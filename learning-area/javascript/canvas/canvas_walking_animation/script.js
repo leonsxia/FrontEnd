@@ -86,7 +86,6 @@
             super(position[0], position[1], spriteSize[0], spriteSize[1], color);
             this.velX = 2;
             this.velY = 9;
-            this.velY
             this.velXFast = 6;
             this.direction = 'right';
             this.imageLeft = imageLeft;
