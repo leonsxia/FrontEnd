@@ -69,6 +69,7 @@
         player.collisionDetect(obstacles);
         player.checkCollisionHappened();
         player.checkBound(); 
+        // console.log(`InAir: ${player.IsInAir}`);
     }
 
     Promise.all([imageLeft, imageRight]).then((images) => {
@@ -168,6 +169,10 @@
 
         get bottomY() {
             return this.posY + this.spriteHeight;
+        }
+
+        get IsInAir() {
+            return this.bottomY < groundLevel && !this.#bottomBlock;
         }
 
         draw() {
