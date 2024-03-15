@@ -10,4 +10,15 @@ for(var i = 0; i < cities.length; i++) {
   var result = input;
   console.log(result);
 }
+
+function run(test) {
+  if (test !== undefined) {
+    console.log(test);
+  } else {
+    console.log('undefined');
+  }
+}
+
+run();
+run('test');
 console.log(i);

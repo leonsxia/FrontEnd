@@ -24,7 +24,7 @@
         player.setControls();
         obstacles.push(new Obstacle([-width / 2 + 300, 74], [width - 300, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
         obstacles.push(new Obstacle([200, -6], [150, 80], obstacleStyle, obstacleTypes[1]));
-        obstacles.push(new Obstacle([275, -56], [150, 100], obstacleStyle, obstacleTypes[1]));
+        obstacles.push(new Obstacle([275, -76], [150, 100], obstacleStyle, obstacleTypes[1]));
         obstacles.push(new Obstacle([-400, -250], [150, 10], obstacleStyle, obstacleTypes[1]));
         obstacles.push(new Obstacle([-100, -160], [150, 10], obstacleStyle, obstacleTypes[1]));
         run(0);
@@ -255,7 +255,7 @@
                 if (this.bottomY > groundLevel) {
                     this.posY = groundLevel - this.spriteHeight;
                     this.jumpTimes = 0;
-                    this.velG = 0;
+                    this.velG = 0; // can be ignored, velG will reset when jumping up.
                     if (this.#SpaceKeyDown) {
                         this.resetJumpStatus(true);
                     }
@@ -301,7 +301,7 @@
                         isBlock = true;
                         this.resetJumpStatus(false);
                         this.jumpTimes = 0;
-                        this.velG = 0;
+                        this.velG = 0; // can be ignored, but when bottom is blocked, velG should be 0.
                         // console.log(`${this.#bottomBlock}`);
                         if (this.#SpaceKeyDown) {
                             this.resetJumpStatus(true);
