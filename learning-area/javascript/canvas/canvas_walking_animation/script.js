@@ -19,6 +19,58 @@
     let obstacleStyle = 'rgb(0, 255, 0)';
     let playrStyle = 'rgb(0, 255, 0)';
     let obstacleTypes = ['rectangle_stroke', 'rectangle_fill'];
+
+    let averageFrames = 0;
+    let start, preTimeStamp, prestamp;
+    const fps = 60;
+    const msPerFrame = 1000 / fps; // 16.666666667
+
+    function run(timestamp) {
+        requestAnimationFrame(run);
+
+        if (start === undefined) {
+            start = timestamp;
+            preTimeStamp = prestamp = timestamp;
+        }
+        const elapsed = timestamp - preTimeStamp;
+        // const trueElapsed = timestamp - prestamp;
+        // prestamp = timestamp;
+        // console.log(trueElapsed);
+        
+        if (elapsed < msPerFrame) {
+            return
+        }
+        frames++;
+        const excessTime = elapsed % msPerFrame;
+        preTimeStamp = timestamp - excessTime;
+        // console.log(`timestamp: ${timestamp} elapsed: ${elapsed} excessTime: ${excessTime} pretimestamp: ${preTimeStamp} frames*msPerFrame: ${frames * msPerFrame}`);
+        
+        // clear screen
+        ctx.fillStyle = '#222';
+        ctx.fillRect(- width / 2, - 3 * height / 4, width, height);
+
+        // title
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.font = "36px arial";
+        ctx.strokeText("Scroll Engine Test", - width / 2 + 10, - 3 * height / 4 + 36);
+
+        // fps
+        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 1;
+        ctx.font = "18px sans-serif";
+        ctx.strokeText(`FPS: ${averageFrames.toFixed(2)}`, width / 2 - 100, - 3 * height / 4 + 36);
+        
+        obstacles.forEach(obs => {
+            obs.draw();
+        })
+        player.draw();
+        player.checkMovement();
+        player.collisionDetect(obstacles);
+        player.checkCollisionHappened();
+        player.checkBound(); 
+    }
+
     Promise.all([imageLeft, imageRight]).then((images) => {
         player = new Player(images[0], images[1], [- width / 2 + 10, -74], 10, 5, [102, 148], playrStyle);
         player.setControls();
@@ -28,6 +80,11 @@
         obstacles.push(new Obstacle([-400, -250], [150, 10], obstacleStyle, obstacleTypes[1]));
         obstacles.push(new Obstacle([-100, -160], [150, 10], obstacleStyle, obstacleTypes[1]));
         run(0);
+        setInterval(() => {
+            // console.log(frames);        
+            averageFrames = frames;
+            frames = 0;
+        }, 1000);
         // draw();
     });
 
@@ -103,7 +160,7 @@
             this.gravity = 9.8;
             this.upEffect = 1.8;
             this.downEffect = 2.6;
-            this.elapsedMSPerFrame = 1000 / 60;
+            this.elapsedMSPerFrame = msPerFrame;
             this.color = color;
             this.jumpTimes = 0;
             this.topJumpTimes = 1;
@@ -353,60 +410,3 @@
             this.elapsedTime = 0;
         }
     }
-
-    let averageFrames = 0;
-    let start, preTimeStamp, prestamp;
-    const fps = 60;
-    const msPerFrame = 1000 / fps; // 16.666666667
-
-    function run(timestamp) {
-        requestAnimationFrame(run);
-
-        if (start === undefined) {
-            start = timestamp;
-            preTimeStamp = prestamp = timestamp;
-        }
-        const elapsed = timestamp - preTimeStamp;
-        // const trueElapsed = timestamp - prestamp;
-        // prestamp = timestamp;
-        // console.log(trueElapsed);
-        
-        if (elapsed < msPerFrame) {
-            return
-        }
-        frames++;
-        const excessTime = elapsed % msPerFrame;
-        preTimeStamp = timestamp - excessTime;
-        // console.log(`timestamp: ${timestamp} elapsed: ${elapsed} excessTime: ${excessTime} pretimestamp: ${preTimeStamp} frames*msPerFrame: ${frames * msPerFrame}`);
-        
-        // clear screen
-        ctx.fillStyle = '#222';
-        ctx.fillRect(- width / 2, - 3 * height / 4, width, height);
-
-        // title
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 1;
-        ctx.font = "36px arial";
-        ctx.strokeText("Scroll Engine Test", - width / 2 + 10, - 3 * height / 4 + 36);
-
-        // fps
-        ctx.strokeStyle = "yellow";
-        ctx.lineWidth = 1;
-        ctx.font = "18px sans-serif";
-        ctx.strokeText(`FPS: ${averageFrames.toFixed(2)}`, width / 2 - 100, - 3 * height / 4 + 36);
-        
-        obstacles.forEach(obs => {
-            obs.draw();
-        })
-        player.draw();
-        player.checkMovement();
-        player.collisionDetect(obstacles);
-        player.checkCollisionHappened();
-        player.checkBound(); 
-    }
-
-    setInterval(() => {
-        // console.log(frames);        
-        averageFrames = frames;
-        frames = 0;
-    }, 1000);
