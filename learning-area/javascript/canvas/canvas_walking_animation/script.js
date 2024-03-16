@@ -3,6 +3,14 @@ const width = canvas.width = window.innerWidth;
 const height = canvas.height = window.innerHeight;
 const ctx = canvas.getContext('2d');
 const groundLevel = height / 4;
+const centerLineX = 0;
+const centerLeft = -10;
+const centerRight = 10;
+const leftScrollCenterFactor = 400;
+const leftScrollLeft = - width / 2 + leftScrollCenterFactor - 10;
+const leftScrollRight = - width / 2 + leftScrollCenterFactor + 10;
+const invisibleLeft = - width / 2;  // - 200;
+const invisibleRight = width / 2; //+ 200;
 
 ctx.fillStyle = 'rgb(0,0,0)';
 ctx.fillRect(0, 0, width, height);
@@ -16,7 +24,9 @@ imageRight.src = "walk-right.png";
 let player;
 let obstacles = [];
 let sandbox;
+let scrollEngine;
 let obstacleStyle = 'rgb(0, 255, 0)';
+let obstacleBufferStyle = 'orange';
 let playrStyle = 'rgb(0, 255, 0)';
 let obstacleTypes = ['rectangle_stroke', 'rectangle_fill'];
 
@@ -25,13 +35,26 @@ const msPerFrame = 1000 / fps; // 16.666666667
 
 Promise.all([imageLeft, imageRight]).then((images) => {
     player = new Player(images[0], images[1], [- width / 2 + 10, -74], 10, 5, [102, 148], playrStyle);
-    player.setControls();
-    obstacles.push(new Obstacle([-width / 2 + 300, 74], [width - 300, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([-width / 2 + 300, 74], [width, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([-width / 2 + 300 + width, 74], [width / 4, height / 4 - 74], obstacleBufferStyle, obstacleTypes[1], true));
+    obstacles.push(new Obstacle([-width / 2 + 300 + 1.25 * width, 74], [width / 2, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([-width / 2 + 300 + 1.75 * width, 74], [width / 4, height / 4 - 74], obstacleBufferStyle, obstacleTypes[1], true));
+    obstacles.push(new Obstacle([-width / 2 + 300 + 2 * width, 74], [width / 2, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([-width / 2 + 300 + 2.5 * width, 0], [width / 4, height / 4 - 74], obstacleBufferStyle, obstacleTypes[1], true));
+    obstacles.push(new Obstacle([-width / 2 + 300 + 2.75 * width, 74], [width / 2, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([-width / 2 + 300 + 3.45 * width, 74], [width / 2, height / 4 - 74], obstacleStyle, obstacleTypes[1]));
     obstacles.push(new Obstacle([200, -6], [150, 80], obstacleStyle, obstacleTypes[1]));
     obstacles.push(new Obstacle([275, -76], [150, 100], obstacleStyle, obstacleTypes[1]));
     obstacles.push(new Obstacle([-400, -250], [150, 10], obstacleStyle, obstacleTypes[1]));
     obstacles.push(new Obstacle([-100, -160], [150, 10], obstacleStyle, obstacleTypes[1]));
-    sandbox = new Sandbox(player, obstacles);
+    obstacles.push(new Obstacle([800, -26], [250, 100], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([1200, -26], [250, 100], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([1800, -26], [250, 100], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([2100, -146], [250, 25], obstacleStyle, obstacleTypes[1]));
+    obstacles.push(new Obstacle([2600, -146], [250, 25], obstacleStyle, obstacleTypes[1]));
+    scrollEngine = new ScrollEngine(player, obstacles);
+    scrollEngine.setScrollControls();
+    sandbox = new Sandbox(player, obstacles, scrollEngine);
     sandbox.run(0);
     sandbox.calcFrames();
 });
@@ -56,10 +79,11 @@ class Sprite {
 }
 
 class Obstacle extends Sprite {
-    constructor(position, size, color, type) {
+    constructor(position, size, color, type, isBuffer) {
         super(position[0], position[1], size[0], size[1], color);
         this.color = color;
         this.type = type;
+        this.isBuffer = isBuffer;
     }
 
     draw() {
@@ -88,6 +112,8 @@ class Player extends Sprite {
     #rightBlock = false;
     #topBlock = false;
     #bottomBlock = false;
+    #enabaleScroll = true; // scroll switch
+    #isAtBuffer = false;
 
     constructor(imageLeft, imageRight, position, frameRate, fastFrameRate, spriteSize, color) {
         super(position[0], position[1], spriteSize[0], spriteSize[1], color);
@@ -102,7 +128,6 @@ class Player extends Sprite {
         this.jumpMaxHeight = 200;
         this.frameRate = frameRate;
         this.fastFrameRate = fastFrameRate;
-        // this.jumpTime = 0;
         this.inAirFrame = 0;
         this.elapsedTime = 0;
         this.gravity = 9.8;
@@ -112,15 +137,110 @@ class Player extends Sprite {
         this.color = color;
         this.jumpTimes = 0;
         this.topJumpTimes = 1;
+        this.scrollActiveColor = 'green';
     }
 
+    //#region getter
     get bottomY() {
         return this.posY + this.spriteHeight;
     }
 
-    get IsInAir() {
+    get isInAir() {
         return this.bottomY < groundLevel && !this.#bottomBlock;
     }
+
+    get isFalling() {
+        return !player.jump && this.isInAir;
+    }
+
+    get isAtCenter() {
+        return this.collisionCenterX >= centerLineX + centerLeft && this.collisionCenterX <= centerLineX + centerRight;
+    }
+
+    get isAtRightSection() {
+        return this.collisionCenterX >= centerLineX;
+    }
+
+    get isAtLeftScrollLine() {
+        return this.collisionCenterX >= leftScrollLeft && this.collisionCenterX <= leftScrollRight;
+    }
+
+    get isAtLeftBorder() {
+        let gap = this.#fasten ? this.velXFast : this.velX;
+        return this.collisionCenterX <= - width / 2 + this.spriteWidth / 2 
+            && this.collisionCenterX >= - width / 2 + this.spriteWidth / 2 - gap;
+    }
+
+    get isAtRightBorder() {
+        let gap = this.#fasten ? this.velXFast : this.velX;
+        return this.collisionCenterX >= width / 2 - this.spriteWidth / 2
+            && this.collisionCenterX <= width / 2 - this.spriteWidth / 2 + gap;
+    }
+
+    get centerX() {
+        return - this.spriteWidth / 2;
+    }
+
+    get leftScrollX() {
+        return - width / 2 + leftScrollCenterFactor - this.spriteWidth / 2;
+    }
+
+    get isBlockHorizontal() {
+        return this.#leftBlock || this.#rightBlock;
+    }
+
+    get jump() {
+        return this.#jump;
+    }
+
+    get AKeyDown() {
+        return this.#AkeyDown;
+    }
+
+    get DKeyDown() {
+        return this.#DkeyDown;
+    }
+
+    get SpaceKeyDown() {
+        return this.#SpaceKeyDown;
+    }
+
+    get enableScroll() {
+        return this.#enabaleScroll;
+    }
+
+    get isAtBuffer() {
+        return this.#isAtBuffer;
+    }
+    //#endregion
+
+    //#region setter
+    /**
+     * @param {boolean} isMove
+     */
+    set isMove(isMove) {
+        this.#isMove = isMove;
+    }
+
+    /**
+     * @param {boolean} fasten
+     */
+    set fasten(fasten) {
+        this.#fasten = fasten;
+    }
+
+    set AKeyDown(akeydown) {
+        this.#AkeyDown = akeydown;
+    }
+
+    set DKeyDown(dkeydown) {
+        this.#DkeyDown = dkeydown;
+    }
+
+    set SpaceKeyDown(spacekeydown) {
+        this.#SpaceKeyDown = spacekeydown;
+    }
+    //#endregion setter
 
     draw() {
         if (this.direction === 'right') {
@@ -129,93 +249,16 @@ class Player extends Sprite {
             ctx.drawImage(this.imageLeft, (5 - this.sprite) * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, 0 + this.posX, this.posY, this.spriteWidth, this.spriteHeight);
         }
         if (this.#drawCollisionBox) {
+            ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.strokeRect(this.posX, this.posY, this.spriteWidth, this.spriteHeight);
+            // ctx.strokeStyle = this.scrollActiveColor;
+            // ctx.moveTo(this.collisionCenterX, this.posY);
+            // ctx.lineTo(this.collisionCenterX, this.posY - 10);
+            // ctx.stroke();
+            ctx.fillStyle = this.scrollActiveColor;
+            ctx.fillRect(this.collisionCenterX - 5, this.posY - 5, 10, 5);
             // console.log(`dectectCenterX: ${this.detectCenterX}; detectCenterY: ${this.detectCenterY}`);
-        }
-    }
-
-    setControls() {
-        window.onkeydown = e => {
-            switch (e.key) {
-                case 'a':
-                case 'A':
-                case 'ArrowLeft':
-                    this.direction = 'left';
-                    // this.posX -= this.velX;
-                    this.#isMove = true;
-                    this.#AkeyDown = true;
-                    break;
-                case 'd':
-                case 'D':
-                case 'ArrowRight':
-                    this.direction = 'right';
-                    // this.posX += this.velX;
-                    this.#isMove = true;
-                    this.#DkeyDown = true;
-                    break;
-                case 'w':
-                case 'W':
-                case 'ArrowUp':
-                    break;
-                case 's':
-                case 'S':
-                case 'ArrowDown':
-                    break;
-                case 'Shift':
-                    this.#fasten = true;
-                    break;
-                case ' ':
-                    if (this.bottomY === groundLevel || (!this.#jump && this.velG > 0 && this.jumpTimes < this.topJumpTimes)) {
-                        // console.log(`${this.bottomY} ${this.jumpTimes} ${this.velG} ${this.jumpTimes < this.topJumpTimes && this.bottomY < groundLevel}`);
-                        if (this.jumpTimes < this.topJumpTimes && this.bottomY < groundLevel && !this.#bottomBlock) {
-                            this.jumpTimes++;
-                        }
-
-                        this.resetJumpStatus(true);
-                    }
-                    this.#SpaceKeyDown = true;
-                    break;
-            }
-        }
-
-        window.onkeyup = e => {
-            switch (e.key) {
-                case 'a':
-                case 'A':
-                case 'ArrowLeft':
-                    this.#AkeyDown = false;
-                    if (this.#DkeyDown) {
-                        this.direction = 'right';
-                    } else {
-                        this.#isMove = false;
-                    }
-                    break;
-                case 'd':
-                case 'D':
-                case 'ArrowRight':
-                    this.#DkeyDown = false;
-                    if (this.#AkeyDown) {
-                        this.direction = 'left';
-                    } else {
-                        this.#isMove = false;
-                    }
-                    break;
-                case 'w':
-                case 'W':
-                case 'ArrowUp':
-                case 's':
-                case 'S':
-                case 'ArrowDown':
-                    break;
-                case 'Shift':
-                    this.#fasten = false;
-                    break;
-                case ' ':
-                    this.resetJumpStatus(false);
-                    this.#SpaceKeyDown = false;
-                    break;
-            }
         }
     }
 
@@ -229,9 +272,19 @@ class Player extends Sprite {
                 }
             }
             if (this.direction === 'right') {
+                let lastPosX = this.posX;
                 this.posX += this.#fasten ? this.velXFast : this.velX;
+                if (this.#enabaleScroll && this.isAtRightSection && !this.isBlockHorizontal && !this.isAtBuffer && !this.isAtRightBorder) {
+                    // console.log('right section');
+                    this.posX = lastPosX + this.spriteWidth / 2 < centerLineX ? centerLineX - this.spriteWidth / 2 : lastPosX;
+                }
             } else {
-                this.posX -= this.#fasten ? this.velXFast : this.velX;
+                if (!this.isAtLeftBorder) {
+                    this.posX -= this.#fasten ? this.velXFast : this.velX;
+                }
+                if (this.#enabaleScroll && this.isAtLeftScrollLine && !this.isBlockHorizontal && !this.isAtBuffer && !this.isAtLeftBorder) {
+                    this.posX = this.posX > this.leftScrollX ? this.posX : this.leftScrollX;
+                }
             }
             this.spriteFrames++;
         } else {
@@ -273,20 +326,22 @@ class Player extends Sprite {
     }
 
     collisionDetect(obstacles) {
+        const collisionColor = 'rgb(255, 0, 0)';
+        const bufferCollisionColor = 'brown';
         this.#leftBlock = this.#rightBlock = this.#topBlock = this.#bottomBlock = false;
+        let isAtBuffer = false;
         obstacles.forEach((obs) => {
             let dx = Math.abs(this.collisionCenterX - obs.collisionCenterX);
             let dy = Math.abs(this.collisionCenterY - obs.collisionCenterY);
             let attachWidth = this.spriteWidth / 2 + obs.spriteWidth / 2;
             let attachHeight = this.spriteHeight / 2 + obs.spriteHeight / 2;
-            let collisionColor = 'rgb(255, 0, 0)';
             let isBlock = false;
 
             if (dy < attachHeight) {
                 let xgap = this.#fasten ? this.velXFast : this.velX;
 
                 if (this.collisionCenterX < obs.collisionCenterX && dx <= attachWidth && dx >= attachWidth - xgap) {
-                    console.log(`xgap:${xgap} dx:${dx} attachWidth:${attachWidth}`);
+                    // console.log(`xgap:${xgap} dx:${dx} attachWidth:${attachWidth}`);
                     this.#rightBlock = true;
                     this.posX = obs.posX - this.spriteWidth;
                     dx = Math.abs(this.collisionCenterX - obs.collisionCenterX);
@@ -294,7 +349,7 @@ class Player extends Sprite {
                 }
 
                 if (this.collisionCenterX > obs.collisionCenterX && dx <= attachWidth && dx >= attachWidth - xgap) {
-                    console.log(`xgap:${xgap} dx:${dx} attachWidth:${attachWidth}`);
+                    // console.log(`xgap:${xgap} dx:${dx} attachWidth:${attachWidth}`);
                     this.#leftBlock = true;
                     this.posX = obs.posX + obs.spriteWidth;
                     dx = Math.abs(this.collisionCenterX - obs.collisionCenterX);
@@ -331,20 +386,41 @@ class Player extends Sprite {
             } else {
                 obs.color = obs.notCollisionColor;
             }
-        })
+
+            if (obs.isBuffer && this.posX >= obs.posX - this.spriteWidth && this.posX <= obs.posX + obs.spriteWidth) {
+                isAtBuffer = true;
+                obs.color = bufferCollisionColor;
+            }
+        });
+        if (isAtBuffer) {
+            this.#isAtBuffer = true;
+        } else {
+            this.#isAtBuffer = false;
+        }
     }
 
     checkBound() {
         let rate = this.#fasten ? this.fastFrameRate : this.frameRate;
-        if (this.collisionCenterX > width / 2 - this.spriteWidth / 2) { // right border
-            // let newStartPos = width / 2 - this.spriteWidth;
-            // this.posX = Math.floor(newStartPos / rate) * rate;
-            this.posX = width / 2 - this.spriteWidth
-        } else if (this.collisionCenterX < - width / 2 + this.spriteWidth / 2) { // left border
-            // let newStartPos = - width / 2;
-            // this.posX = Math.ceil(newStartPos / rate) * rate;
+        let gap = this.#fasten ? this.velXFast : this.velX;
+        if (this.collisionCenterX > width / 2 - this.spriteWidth / 2 
+            && this.collisionCenterX <= width / 2 - this.spriteWidth / 2 + gap 
+            // && !this.isInAir && this.direction === 'right'
+            ) { // right border
+            this.posX = width / 2 - this.spriteWidth;
+            // console.log('right border reaches.');
+        } else if (this.collisionCenterX < - width / 2 + this.spriteWidth / 2 
+            && this.collisionCenterX >= - width / 2 + this.spriteWidth / 2 - gap
+            // && !this.isInAir && this.direction === 'left'
+            ) { // left border
             this.posX = - width / 2;
+            // console.log('left border reaches.');
         }
+
+        // if (this.posX < invisibleLeft) {
+        //     this.posX = invisibleLeft;
+        // } else if (this.posX > invisibleRight - this.spriteWidth) {
+        //     this.posX = invisibleRight - this.spriteWidth;
+        // }
     }
 
     checkCollisionHappened() {
@@ -363,15 +439,159 @@ class Player extends Sprite {
     }
 }
 
+class ScrollEngine {
+    #fasten;
+    #AkeyDown = false;
+    #DKeyDown = false;
+
+    constructor(player, obstacles) {
+        this.player = player;
+        this.obstacles = obstacles;
+        this.scrollDirection = 'left';
+        this.scrollIsMoving = false;
+        this.scrollVelX = 2;
+        this.scrollFastVelX = 6;
+    }
+
+    get isMoving() {
+        return this.player.enableScroll && !this.player.isBlockHorizontal //&& (!player.isInAir || (player.isInAir && player.isFalling))
+        && ((!this.player.isAtBuffer
+        && ((player.isAtLeftScrollLine && this.#AkeyDown) 
+            || (player.isAtRightSection && this.#DKeyDown)))
+            || ((player.isAtLeftBorder && this.#AkeyDown)
+            || (player.isAtRightBorder && this.#DKeyDown)));
+    }
+
+    setScrollControls() {
+        let player = this.player;
+        window.onkeydown = e => {
+            switch (e.key) {
+                case 'a':
+                case 'A':
+                case 'ArrowLeft':
+                    player.direction = 'left';
+                    player.isMove = true;
+                    player.AkeyDown = true;
+                    this.#AkeyDown = true;
+                    this.scrollDirection = 'right';
+                    break;
+                case 'd':
+                case 'D':
+                case 'ArrowRight':
+                    player.direction = 'right';
+                    player.isMove = true;
+                    player.DkeyDown = true;
+                    this.#DKeyDown = true;
+                    this.scrollDirection = 'left';
+                    break;
+                case 'w':
+                case 'W':
+                case 'ArrowUp':
+                    break;
+                case 's':
+                case 'S':
+                case 'ArrowDown':
+                    break;
+                case 'Shift':
+                    player.fasten = true;
+                    this.#fasten = true;
+                    break;
+                case ' ':
+                    // **** !player.jump && player.velG > 0 means player is falling when not hit the highest place. ****
+                    if (player.bottomY === groundLevel || (!player.jump && player.velG > 0 && player.jumpTimes < player.topJumpTimes)) {
+                        // console.log(`${player.bottomY} ${player.jumpTimes} ${player.velG} ${player.jumpTimes < player.topJumpTimes && player.bottomY < groundLevel}`);
+                        if (player.jumpTimes < player.topJumpTimes && player.isInAir) {
+                            player.jumpTimes++;
+                        }
+
+                        player.resetJumpStatus(true);
+                    }
+                    player.SpaceKeyDown = true;
+                    break;
+            }
+        }
+
+        window.onkeyup = e => {
+            switch (e.key) {
+                case 'a':
+                case 'A':
+                case 'ArrowLeft':
+                    player.AkeyDown = false;
+                    if (player.DkeyDown) {
+                        player.direction = 'right';
+                    } else {
+                        player.isMove = false;
+                    }
+                    this.#AkeyDown = false;
+                    if (this.#DKeyDown) {
+                        this.scrollDirection = 'left';
+                    }
+                    break;
+                case 'd':
+                case 'D':
+                case 'ArrowRight':
+                    player.DkeyDown = false;
+                    if (player.AkeyDown) {
+                        player.direction = 'left';
+                    } else {
+                        player.isMove = false;
+                    }
+                    this.#DKeyDown = false;
+                    if (this.#AkeyDown) {
+                        this.scrollDirection = 'right';
+                    }
+                    break;
+                case 'w':
+                case 'W':
+                case 'ArrowUp':
+                case 's':
+                case 'S':
+                case 'ArrowDown':
+                    break;
+                case 'Shift':
+                    player.fasten = false;
+                    this.#fasten = false;
+                    break;
+                case ' ':
+                    player.resetJumpStatus(false);
+                    player.SpaceKeyDown = false;
+                    break;
+            }
+        }
+    }
+
+    scroll() {
+        if (this.isMoving) 
+        {
+            if (this.scrollDirection === 'left') {
+                this.obstacles.forEach(obs => {
+                    obs.posX -= this.#fasten ? this.scrollFastVelX : this.scrollVelX;
+                });
+                // console.log('scroll is moving left.');
+            } else {
+                this.obstacles.forEach(obs => {
+                    obs.posX += this.#fasten ? this.scrollFastVelX : this.scrollVelX;
+                });
+                // console.log('scroll is moving right');
+            }
+        } else {
+            // console.log('scroll stopped.');
+        }
+    }
+}
+
 class Sandbox {
     averageFrames = 0;
     start = undefined;
     preTimeStamp;
     prestamp;
     frames = 0;
-    constructor(player, obstacles) {
+    #showTestingLines = true;
+
+    constructor(player, obstacles, scrollEngine) {
         this.player = player;
         this.obstacles = obstacles;
+        this.scrollEngine = scrollEngine;
     }
 
     run(timestamp) {
@@ -400,16 +620,18 @@ class Sandbox {
         ctx.fillRect(- width / 2, - 3 * height / 4, width, height);
 
         // title
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = 'white';
         ctx.lineWidth = 1;
-        ctx.font = "36px arial";
-        ctx.strokeText("Scroll Engine Test", - width / 2 + 10, - 3 * height / 4 + 36);
+        ctx.font = '36px arial';
+        ctx.strokeText('Scroll Engine Test', - width / 2 + 10, - 3 * height / 4 + 36);
 
         // fps
-        ctx.strokeStyle = "yellow";
+        ctx.strokeStyle = 'yellow';
         ctx.lineWidth = 1;
-        ctx.font = "18px sans-serif";
+        ctx.font = '18px sans-serif';
         ctx.strokeText(`FPS: ${_this.averageFrames.toFixed(2)}`, width / 2 - 100, - 3 * height / 4 + 36);
+
+        
 
         _this.obstacles.forEach(obs => {
             obs.draw();
@@ -419,7 +641,52 @@ class Sandbox {
         _this.player.collisionDetect(obstacles);
         _this.player.checkCollisionHappened();
         _this.player.checkBound();
-        // console.log(`InAir: ${_this.player.IsInAir}`);
+        _this.scrollEngine.scroll();
+
+        const reachColor = 'blue';
+        const notReachColor = 'green';
+        if (_this.player.isAtRightSection) {
+            _this.player.scrollActiveColor = reachColor;
+            // console.log('player reaches the center.');
+        } else if (_this.player.isAtLeftScrollLine) {
+            _this.player.scrollActiveColor = reachColor;
+        } else if (_this.player.isAtLeftBorder) {
+            _this.player.scrollActiveColor = reachColor;
+        } else if (_this.player.isAtRightBorder) {
+            _this.player.scrollActiveColor = reachColor;
+        } else {
+            _this.player.scrollActiveColor = notReachColor;
+        }
+        // console.log(`InAir: ${_this.player.isInAir}`);
+        // console.log(`Falling: ${_this.player.isFalling}`);
+        // if (_this.player.isAtBuffer) {
+        //     console.log(`player is at buffer`);
+        // }
+        // if (_this.player.isBlockHorizontal) {
+        //     console.log(`player is block horizontal`);
+        // }
+
+        // center line
+        if (_this.#showTestingLines) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255, 255, 0, 0.2)';
+            ctx.setLineDash([5, 5]);
+            // ctx.moveTo(centerLeft, - 3 * height / 4);
+            // ctx.lineTo(centerLeft, height / 4);
+            // ctx.stroke();
+            // ctx.moveTo(centerRight, - 3 * height / 4);
+            // ctx.lineTo(centerRight, height / 4);
+            ctx.moveTo(centerLineX, - 3 * height / 4);
+            ctx.lineTo(centerLineX, height / 4);
+            ctx.stroke();
+            ctx.moveTo(leftScrollLeft, - 3 * height / 4);
+            ctx.lineTo(leftScrollLeft, height / 4);
+            ctx.stroke();
+            ctx.moveTo(leftScrollRight, - 3 * height / 4);
+            ctx.lineTo(leftScrollRight, height / 4);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
     }
 
     calcFrames() {
