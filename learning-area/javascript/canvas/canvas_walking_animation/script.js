@@ -595,25 +595,25 @@ class Sandbox {
     }
 
     run(timestamp) {
-        let _this = sandbox;
-        window.requestAnimationFrame(_this.run);
+        // let _this = sandbox;
+        window.requestAnimationFrame(this.run.bind(this));
 
-        if (_this.start === undefined) {
-            _this.start = timestamp;
-            _this.preTimeStamp = _this.prestamp = timestamp;
+        if (this.start === undefined) {
+            this.start = timestamp;
+            this.preTimeStamp = this.prestamp = timestamp;
         }
-        const elapsed = timestamp - _this.preTimeStamp;
-        // const trueElapsed = timestamp - _this.prestamp;
-        // _this.prestamp = timestamp;
+        const elapsed = timestamp - this.preTimeStamp;
+        // const trueElapsed = timestamp - this.prestamp;
+        // this.prestamp = timestamp;
         // console.log(trueElapsed);
 
         if (elapsed < msPerFrame) {
             return
         }
-        _this.frames++;
+        this.frames++;
         const excessTime = elapsed % msPerFrame;
-        _this.preTimeStamp = timestamp - excessTime;
-        // console.log(`timestamp: ${timestamp} elapsed: ${elapsed} excessTime: ${excessTime} pretimestamp: ${_this.preTimeStamp} _this.frames*msPerFrame: ${_this.frames * msPerFrame}`);
+        this.preTimeStamp = timestamp - excessTime;
+        // console.log(`timestamp: ${timestamp} elapsed: ${elapsed} excessTime: ${excessTime} pretimestamp: ${this.preTimeStamp} this.frames*msPerFrame: ${this.frames * msPerFrame}`);
 
         // clear screen
         ctx.fillStyle = '#222';
@@ -629,45 +629,45 @@ class Sandbox {
         ctx.strokeStyle = 'yellow';
         ctx.lineWidth = 1;
         ctx.font = '18px sans-serif';
-        ctx.strokeText(`FPS: ${_this.averageFrames.toFixed(2)}`, width / 2 - 100, - 3 * height / 4 + 36);
+        ctx.strokeText(`FPS: ${this.averageFrames.toFixed(2)}`, width / 2 - 100, - 3 * height / 4 + 36);
 
         
 
-        _this.obstacles.forEach(obs => {
+        this.obstacles.forEach(obs => {
             obs.draw();
         })
-        _this.player.draw();
-        _this.player.checkMovement();
-        _this.player.collisionDetect(obstacles);
-        _this.player.checkCollisionHappened();
-        _this.player.checkBound();
-        _this.scrollEngine.scroll();
+        this.player.draw();
+        this.player.checkMovement();
+        this.player.collisionDetect(obstacles);
+        this.player.checkCollisionHappened();
+        this.player.checkBound();
+        this.scrollEngine.scroll();
 
         const reachColor = 'blue';
         const notReachColor = 'green';
-        if (_this.player.isAtRightSection) {
-            _this.player.scrollActiveColor = reachColor;
+        if (this.player.isAtRightSection) {
+            this.player.scrollActiveColor = reachColor;
             // console.log('player reaches the center.');
-        } else if (_this.player.isAtLeftScrollLine) {
-            _this.player.scrollActiveColor = reachColor;
-        } else if (_this.player.isAtLeftBorder) {
-            _this.player.scrollActiveColor = reachColor;
-        } else if (_this.player.isAtRightBorder) {
-            _this.player.scrollActiveColor = reachColor;
+        } else if (this.player.isAtLeftScrollLine) {
+            this.player.scrollActiveColor = reachColor;
+        } else if (this.player.isAtLeftBorder) {
+            this.player.scrollActiveColor = reachColor;
+        } else if (this.player.isAtRightBorder) {
+            this.player.scrollActiveColor = reachColor;
         } else {
-            _this.player.scrollActiveColor = notReachColor;
+            this.player.scrollActiveColor = notReachColor;
         }
-        // console.log(`InAir: ${_this.player.isInAir}`);
-        // console.log(`Falling: ${_this.player.isFalling}`);
-        // if (_this.player.isAtBuffer) {
+        // console.log(`InAir: ${this.player.isInAir}`);
+        // console.log(`Falling: ${this.player.isFalling}`);
+        // if (this.player.isAtBuffer) {
         //     console.log(`player is at buffer`);
         // }
-        // if (_this.player.isBlockHorizontal) {
+        // if (this.player.isBlockHorizontal) {
         //     console.log(`player is block horizontal`);
         // }
 
         // center line
-        if (_this.#showTestingLines) {
+        if (this.#showTestingLines) {
             ctx.beginPath();
             ctx.strokeStyle = 'rgba(255, 255, 0, 0.2)';
             ctx.setLineDash([5, 5]);
