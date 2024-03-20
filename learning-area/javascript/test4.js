@@ -15,8 +15,11 @@ function Ball(x, y, velX, velY, exists, color, size) {
     this.size = size;
 }
 
-Ball.prototype = Object.create(Shape.prototype);
-Ball.prototype.constructor = Ball;
+// Ball.prototype = Object.create(Shape.prototype);
+// Ball.prototype.constructor = Ball;
+// Object.setPrototypeOf(Ball.prototype, Shape.prototype);
+Ball.prototype.__proto__ = Shape.prototype;
 
 let ball = new Ball(10, 20, 5, 5, true, 'rgb(12, 18, 20)', 10);
+// ball ---> Ball.prototype ---> Shape.prototype ---> Object.prototype ---> null
 console.log(ball);
