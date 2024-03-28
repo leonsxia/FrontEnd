@@ -6,6 +6,10 @@ function Shape(x, y, velX, velY, exists) {
     this.exists = exists;
 }
 
+Shape.prototype.init = function() {
+    
+}
+
 // 定义 Ball 构造器，继承自 Shape
 
 function Ball(x, y, velX, velY, exists, color, size) {
@@ -19,6 +23,7 @@ function Ball(x, y, velX, velY, exists, color, size) {
 // Ball.prototype.constructor = Ball;
 // Object.setPrototypeOf(Ball.prototype, Shape.prototype);
 Ball.prototype.__proto__ = Shape.prototype;
+// Ball.prototype = new Shape;
 
 let ball = new Ball(10, 20, 5, 5, true, 'rgb(12, 18, 20)', 10);
 // ball ---> Ball.prototype ---> Shape.prototype ---> Object.prototype ---> null
