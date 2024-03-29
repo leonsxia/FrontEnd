@@ -32,6 +32,7 @@ let obstacleTypes = ['rectangle_stroke', 'rectangle_fill'];
 
 const fps = 60;
 const msPerFrame = 1000 / fps; // 16.666666667
+const velFactor = 60 / fps;
 
 Promise.all([imageLeft, imageRight]).then((images) => {
     player = new Player(images[0], images[1], [- width / 2 + 10, -74], 10, 5, [102, 148], playrStyle);
@@ -133,7 +134,7 @@ class Player extends Sprite {
         this.gravity = 9.8;
         this.upEffect = 1.8;
         this.downEffect = 2.6;
-        this.elapsedMSPerFrame = msPerFrame;
+        this.elapsedMSPerFrame = 16.67;//msPerFrame;
         this.color = color;
         this.jumpTimes = 0;
         this.topJumpTimes = 1;
@@ -166,13 +167,13 @@ class Player extends Sprite {
     }
 
     get isAtLeftBorder() {
-        let gap = this.#fasten ? this.velXFast : this.velX;
+        let gap = this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
         return this.collisionCenterX <= - width / 2 + this.spriteWidth / 2 
             && this.collisionCenterX >= - width / 2 + this.spriteWidth / 2 - gap;
     }
 
     get isAtRightBorder() {
-        let gap = this.#fasten ? this.velXFast : this.velX;
+        let gap = this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
         return this.collisionCenterX >= width / 2 - this.spriteWidth / 2
             && this.collisionCenterX <= width / 2 - this.spriteWidth / 2 + gap;
     }
@@ -273,14 +274,14 @@ class Player extends Sprite {
             }
             if (this.direction === 'right') {
                 let lastPosX = this.posX;
-                this.posX += this.#fasten ? this.velXFast : this.velX;
+                this.posX += this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
                 if (this.#enabaleScroll && this.isAtRightSection && !this.isBlockHorizontal && !this.isAtBuffer && !this.isAtRightBorder) {
                     // console.log('right section');
                     this.posX = lastPosX + this.spriteWidth / 2 < centerLineX ? centerLineX - this.spriteWidth / 2 : lastPosX;
                 }
             } else {
                 if (!this.isAtLeftBorder) {
-                    this.posX -= this.#fasten ? this.velXFast : this.velX;
+                    this.posX -= this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
                 }
                 if (this.#enabaleScroll && this.isAtLeftScrollLine && !this.isBlockHorizontal && !this.isAtBuffer && !this.isAtLeftBorder) {
                     this.posX = this.posX > this.leftScrollX ? this.posX : this.leftScrollX;
@@ -338,7 +339,7 @@ class Player extends Sprite {
             let isBlock = false;
 
             if (dy < attachHeight) {
-                let xgap = this.#fasten ? this.velXFast : this.velX;
+                let xgap = this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
 
                 if (this.collisionCenterX < obs.collisionCenterX && dx <= attachWidth && dx >= attachWidth - xgap) {
                     // console.log(`xgap:${xgap} dx:${dx} attachWidth:${attachWidth}`);
@@ -401,7 +402,7 @@ class Player extends Sprite {
 
     checkBound() {
         let rate = this.#fasten ? this.fastFrameRate : this.frameRate;
-        let gap = this.#fasten ? this.velXFast : this.velX;
+        let gap = this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
         if (this.collisionCenterX > width / 2 - this.spriteWidth / 2 
             && this.collisionCenterX <= width / 2 - this.spriteWidth / 2 + gap 
             // && !this.isInAir && this.direction === 'right'
@@ -565,12 +566,12 @@ class ScrollEngine {
         {
             if (this.scrollDirection === 'left') {
                 this.obstacles.forEach(obs => {
-                    obs.posX -= this.#fasten ? this.scrollFastVelX : this.scrollVelX;
+                    obs.posX -= this.#fasten ? velFactor * this.scrollFastVelX : velFactor * this.scrollVelX;
                 });
                 // console.log('scroll is moving left.');
             } else {
                 this.obstacles.forEach(obs => {
-                    obs.posX += this.#fasten ? this.scrollFastVelX : this.scrollVelX;
+                    obs.posX += this.#fasten ? velFactor * this.scrollFastVelX : velFactor * this.scrollVelX;
                 });
                 // console.log('scroll is moving right');
             }
@@ -596,7 +597,7 @@ class Sandbox {
 
     run(timestamp) {
         // let _this = sandbox;
-        window.requestAnimationFrame(this.run.bind(this));
+        //window.requestAnimationFrame(this.run.bind(this));
 
         if (this.start === undefined) {
             this.start = timestamp;
@@ -608,6 +609,7 @@ class Sandbox {
         // console.log(trueElapsed);
 
         if (elapsed < msPerFrame) {
+            window.requestAnimationFrame(this.run.bind(this));
             return
         }
         this.frames++;
@@ -630,8 +632,6 @@ class Sandbox {
         ctx.lineWidth = 1;
         ctx.font = '18px sans-serif';
         ctx.strokeText(`FPS: ${this.averageFrames.toFixed(2)}`, width / 2 - 100, - 3 * height / 4 + 36);
-
-        
 
         this.obstacles.forEach(obs => {
             obs.draw();
@@ -687,6 +687,8 @@ class Sandbox {
             ctx.stroke();
             ctx.setLineDash([]);
         }
+
+        window.requestAnimationFrame(this.run.bind(this));
     }
 
     calcFrames() {
