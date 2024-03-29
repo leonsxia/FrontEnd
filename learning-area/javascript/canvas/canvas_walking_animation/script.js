@@ -132,9 +132,9 @@ class Player extends Sprite {
         this.inAirFrame = 0;
         this.elapsedTime = 0;
         this.gravity = 9.8;
-        this.upEffect = 1.8;
+        this.upEffect = 1.7;
         this.downEffect = 2.6;
-        this.elapsedMSPerFrame = 16.67;//msPerFrame;
+        this.elapsedMSPerFrame = msPerFrame;
         this.color = color;
         this.jumpTimes = 0;
         this.topJumpTimes = 1;
@@ -160,6 +160,10 @@ class Player extends Sprite {
 
     get isAtRightSection() {
         return this.collisionCenterX >= centerLineX;
+    }
+
+    get isWithinRightSection() {
+        return this.collisionCenterX > centerLineX;
     }
 
     get isAtLeftScrollLine() {
@@ -265,7 +269,7 @@ class Player extends Sprite {
 
     checkMovement() {
         if (this.#isMove) {
-            if (this.spriteFrames % (this.#fasten ? this.fastFrameRate : this.frameRate) === 0) {
+            if (this.spriteFrames * velFactor % (this.#fasten ? this.fastFrameRate : this.frameRate) === 0) {
                 if (this.sprite === 5) {
                     this.sprite = 0;
                 } else {
@@ -280,7 +284,7 @@ class Player extends Sprite {
                     this.posX = lastPosX + this.spriteWidth / 2 < centerLineX ? centerLineX - this.spriteWidth / 2 : lastPosX;
                 }
             } else {
-                if (!this.isAtLeftBorder) {
+                if (!this.isAtLeftBorder && !this.isAtLeftScrollLine || this.isAtBuffer) {
                     this.posX -= this.#fasten ? velFactor * this.velXFast : velFactor * this.velX;
                 }
                 if (this.#enabaleScroll && this.isAtLeftScrollLine && !this.isBlockHorizontal && !this.isAtBuffer && !this.isAtLeftBorder) {
@@ -299,9 +303,9 @@ class Player extends Sprite {
                 this.elapsedTime += this.elapsedMSPerFrame / 1000;
                 // console.log(`${this.elapsedTime}ms`);
             }
-            this.velG = this.velY - this.upEffect * this.gravity * this.elapsedTime
+            this.velG = this.velY - this.upEffect * this.gravity * this.elapsedTime;
             if (this.velG > 0) { //&& this.posY > -this.jumpMaxHeighta
-                this.posY -= this.velG;
+                this.posY -= this.velG * velFactor;
                 // console.log(this.velY * this.elapsedTime);
                 this.sprite = this.direction === 'right' ? 2 : 5;
             } else {
@@ -313,7 +317,7 @@ class Player extends Sprite {
                 this.elapsedTime += this.elapsedMSPerFrame / 1000;
                 // console.log(`${this.elapsedTime}ms`);
             }
-            this.posY += this.velY + this.downEffect * this.gravity * this.elapsedTime;
+            this.posY += (this.velY + this.downEffect * this.gravity * this.elapsedTime) * velFactor;
             // console.log(`deltaVelY: ${this.velY + this.downEffect * this.gravity * this.elapsedTime}`);
             if (this.bottomY > groundLevel) {
                 this.posY = groundLevel - this.spriteHeight;
@@ -444,6 +448,7 @@ class ScrollEngine {
     #fasten;
     #AkeyDown = false;
     #DKeyDown = false;
+    #lockScroll = false;
 
     constructor(player, obstacles) {
         this.player = player;
@@ -456,7 +461,7 @@ class ScrollEngine {
 
     get isMoving() {
         return this.player.enableScroll && !this.player.isBlockHorizontal //&& (!player.isInAir || (player.isInAir && player.isFalling))
-        && ((!this.player.isAtBuffer
+        && ((!this.player.isAtBuffer && !this.#lockScroll
         && ((player.isAtLeftScrollLine && this.#AkeyDown) 
             || (player.isAtRightSection && this.#DKeyDown)))
             || ((player.isAtLeftBorder && this.#AkeyDown)
@@ -466,6 +471,7 @@ class ScrollEngine {
     setScrollControls() {
         let player = this.player;
         window.onkeydown = e => {
+            this.#lockScroll = false;
             switch (e.key) {
                 case 'a':
                 case 'A':
@@ -475,6 +481,9 @@ class ScrollEngine {
                     player.AkeyDown = true;
                     this.#AkeyDown = true;
                     this.scrollDirection = 'right';
+                    if (this.#DKeyDown && player.isWithinRightSection) {
+                        this.#lockScroll = true;
+                    }
                     break;
                 case 'd':
                 case 'D':
@@ -513,6 +522,7 @@ class ScrollEngine {
         }
 
         window.onkeyup = e => {
+            this.#lockScroll = false;
             switch (e.key) {
                 case 'a':
                 case 'A':
