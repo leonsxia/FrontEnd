@@ -1,0 +1,4 @@
+mongodb+srv://leonsxia:SxTQlQaa7STOPwXC@cluster0.joscaji.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+curl ifconfig.me
+curl ipinfo.io/json
+DEBUG=express-locallibrary-tutorial:* npm run devstart
