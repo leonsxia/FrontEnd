@@ -81,30 +81,22 @@ export default {
       console.log('game pad down unpressed');
     },
     onGamePadRightPressed() {
-      player.direction = 'right';
-      player.isMove = true;
-      scrollEngine.scrollDirection = 'left';
-      scrollEngine.DkeyDown = true;
+      scrollEngine.goRight();
       console.log(`${player.direction} isMove:${player.isMove}`);
       this.$refs['debug-info-left'].textContent = `${player.direction} isMove:${player.isMove}`;
     },
     onGamePadRightUnPressed() {
-      player.isMove = false;
-      scrollEngine.DkeyDown = false;
+      scrollEngine.stopGoRight();
       console.log(`${player.direction} isMove:${player.isMove}`);
       this.$refs['debug-info-left'].textContent = `${player.direction} isMove:${player.isMove}`;
     },
     onGamePadLeftPressed() {
-      player.direction = 'left';
-      player.isMove = true;
-      scrollEngine.scrollDirection = 'right';
-      scrollEngine.AkeyDown = true;
+      scrollEngine.goLeft();
       console.log(`${player.direction} isMove:${player.isMove}`);
       this.$refs['debug-info-left'].textContent = `${player.direction} isMove:${player.isMove}`;
     },
     onGamePadLeftUnpressed() {
-      player.isMove = false;
-      scrollEngine.AkeyDown = false;
+      scrollEngine.stopGoLeft();
       console.log(`${player.direction} isMove:${player.isMove}`);
       this.$refs['debug-info-left'].textContent = `${player.direction} isMove:${player.isMove}`;
     },
@@ -121,33 +113,22 @@ export default {
       console.log('game pad Y unpressed');
     },
     onGamePadAPressd() {
-      player.fasten = true;
-      scrollEngine.fasten = true;
+      scrollEngine.accelerate();
       console.log(`player-fasten:${player.fasten} scroll-engine-fasten:${scrollEngine.fasten}`);
       this.$refs['debug-info-right'].textContent = `player-fasten:${player.fasten} scroll-engine-fasten:${scrollEngine.fasten}`;
     },
     onGamePadAUnpressd() {
-      player.fasten = false;
-      scrollEngine.fasten = false;
+      scrollEngine.stopAccelerate();
       console.log(`player-fasten:${player.fasten} scroll-engine-fasten:${scrollEngine.fasten}`);
       this.$refs['debug-info-right'].textContent = `player-fasten:${player.fasten} scroll-engine-fasten:${scrollEngine.fasten}`;
     },
     onGamePadBPressed() {
-      if (player.bottomY === config.groundLevel || (!player.jump && player.velG > 0 && player.jumpTimes < player.topJumpTimes)) {
-        if (player.jumpTimes < player.topJumpTimes && player.isInAir) {
-          player.jumpTimes++;
-        }
-        console.log('jump');
-
-        player.resetJumpStatus(true);
-      }
-      player.SpaceKeyDown = true;
+      scrollEngine.jump();
       console.log(`player-jump:${player.jump || player.SpaceKeyDown}`);
       this.$refs['debug-info-right'].textContent = `player-jump:${player.jump || player.SpaceKeyDown}`;
     },
     onGamePadBUnpressed() {
-      player.resetJumpStatus(false);
-      player.SpaceKeyDown = false;
+      scrollEngine.stopJump();
       console.log(`player-jump:${player.jump || player.SpaceKeyDown}`);
       this.$refs['debug-info-right'].textContent = `player-jump:${player.jump || player.SpaceKeyDown}`;
     }

@@ -47,6 +47,60 @@ class ScrollEngine {
             || (this.player.isAtRightBorder && this.#DKeyDown)));
     }
 
+    goLeft() {
+        this.player.direction = 'left';
+        this.player.isMove = true;
+        this.scrollDirection = 'right';
+        this.AkeyDown = true;
+    }
+
+    stopGoLeft() {
+        this.player.isMove = false;
+        this.AkeyDown = false;
+    }
+
+    goRight() {
+        this.player.direction = 'right';
+        this.player.isMove = true;
+        this.scrollDirection = 'left';
+        this.DkeyDown = true;
+    }
+
+    stopGoRight() {
+        this.player.isMove = false;
+        this.DkeyDown = false;
+    }
+
+    jump() {
+        let player = this.player;
+        // **** !player.jump && player.velG > 0 means player is falling when not hit the highest place. ****
+        if (player.bottomY === this.config.groundLevel || (!player.jump && player.velG > 0 && player.jumpTimes < player.topJumpTimes)) {
+            // console.log(`${player.bottomY} ${player.jumpTimes} ${player.velG} ${player.jumpTimes < player.topJumpTimes && player.bottomY < groundLevel}`);
+            if (player.jumpTimes < player.topJumpTimes && player.isInAir) {
+              player.jumpTimes++;
+            }
+            console.log('jump');
+    
+            player.resetJumpStatus(true);
+          }
+          player.SpaceKeyDown = true;
+    }
+
+    stopJump() {
+        this.player.resetJumpStatus(false);
+        this.player.SpaceKeyDown = false;
+    }
+
+    accelerate() {
+        this.player.fasten = true;
+        this.fasten = true;
+    }
+
+    stopAccelerate() {
+        this.player.fasten = false;
+        this.fasten = false;
+    }
+
     setScrollControls() {
         let player = this.player;
         window.onkeydown = e => {
@@ -82,20 +136,10 @@ class ScrollEngine {
                 case 'ArrowDown':
                     break;
                 case 'Shift':
-                    player.fasten = true;
-                    this.#fasten = true;
+                    this.accelerate();
                     break;
                 case ' ':
-                    // **** !player.jump && player.velG > 0 means player is falling when not hit the highest place. ****
-                    if (player.bottomY === this.config.groundLevel || (!player.jump && player.velG > 0 && player.jumpTimes < player.topJumpTimes)) {
-                        // console.log(`${player.bottomY} ${player.jumpTimes} ${player.velG} ${player.jumpTimes < player.topJumpTimes && player.bottomY < groundLevel}`);
-                        if (player.jumpTimes < player.topJumpTimes && player.isInAir) {
-                            player.jumpTimes++;
-                        }
-
-                        player.resetJumpStatus(true);
-                    }
-                    player.SpaceKeyDown = true;
+                    this.jump();
                     break;
             }
         }
@@ -139,12 +183,10 @@ class ScrollEngine {
                 case 'ArrowDown':
                     break;
                 case 'Shift':
-                    player.fasten = false;
-                    this.#fasten = false;
+                    this.stopAccelerate();
                     break;
                 case ' ':
-                    player.resetJumpStatus(false);
-                    player.SpaceKeyDown = false;
+                    this.stopJump();
                     break;
             }
         }
