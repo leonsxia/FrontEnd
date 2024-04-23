@@ -1,0 +1,17 @@
+/*reset.css*/
+/* RESETS */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    
+}
+/*END RESETS*/

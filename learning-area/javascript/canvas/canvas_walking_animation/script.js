@@ -151,7 +151,7 @@ class Player extends Sprite {
     }
 
     get isFalling() {
-        return !player.jump && this.isInAir;
+        return !this.jump && this.isInAir;
     }
 
     get isAtCenter() {
