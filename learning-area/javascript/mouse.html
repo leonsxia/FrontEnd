@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clientX\clientY example</title>
+
+    <script type="text/javascript">
+        function showCoords(evt) {
+            alert(
+                "clientX value: " + evt.clientX + "\n"
+                + "clientY value: " + evt.clientY + "\n"
+            );
+        }
+    </script>
+</head>
+
+<body onmousedown="showCoords(event)">
+    <p>To display the mouse coordinates click anywhere on the page.</p>
+</body>
+
+</html>
