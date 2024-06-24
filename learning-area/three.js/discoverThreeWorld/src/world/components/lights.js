@@ -7,9 +7,9 @@ function createLights(directLightSpecs, spotLightSpecs, ambientLightSpecs, hemis
     const hemisphereLight = new HemisphereLight(hemisphereLightSpecs.skyColor, hemisphereLightSpecs.groundColor, hemisphereLightSpecs.intensity);
 
     // move the light right, up and towards us
-    mainLight.position.set(directLightSpecs.position.x, directLightSpecs.position.y, directLightSpecs.position.z);
-    pointLight.position.set(spotLightSpecs.position.x, spotLightSpecs.position.y, spotLightSpecs.position.z);
-    hemisphereLight.position.set(hemisphereLightSpecs.position.x, hemisphereLightSpecs.position.y, hemisphereLightSpecs.position.z);
+    mainLight.position.set(...directLightSpecs.position);
+    pointLight.position.set(...spotLightSpecs.position);
+    hemisphereLight.position.set(...hemisphereLightSpecs.position);
 
     return { mainLight, pointLight, ambientLight, hemisphereLight };
 }

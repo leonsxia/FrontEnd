@@ -40,19 +40,11 @@ class WorldScene3 {
         const directLightSpecs = {
             color: 'white',
             intensity: 2,
-            position: {
-                x: -10,
-                y: 10,
-                z: 10
-            }
+            position: [-10, 10, 10]
         };
         const spotLightSpecs = {
             color: 0xcccccc,
-            position: {
-                x: 0,
-                y: 0,
-                z: 0
-            },
+            position: [0, 0, 0],
             intensity: 50,
             distance: 0,    // infinity far
             decay: 1    // default 2
@@ -65,11 +57,7 @@ class WorldScene3 {
             skyColor: 0xa0a0a0,
             groundColor: 'darkslategrey',
             intensity: 3,
-            position: { // light emit from top to bottom
-                x: 0,
-                y: 1,
-                z: 0
-            }
+            position: [0, 1, 0] // light emit from top to bottom
         };
         const { mainLight, pointLight, ambientLight, hemisphereLight } = createLights(directLightSpecs, spotLightSpecs, ambientLightSpecs, hemisphereLightSpecs);
 
@@ -77,11 +65,7 @@ class WorldScene3 {
 
         const axesSpecs = {
             size: 3,
-            position: {
-                x: -10.5,
-                y: 0,
-                z: -10.5
-            }
+            position: [-10.5, 0, -10.5]
         };
         const gridSpecs = {
             size: 20,
