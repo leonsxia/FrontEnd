@@ -20,6 +20,8 @@ class WorldScene3 {
     #cameraPos = {x: -1.5, y: 4.5, z: 6.5};
     #staticRendering = true;
     #objects = [];
+    #loaded = false;
+    #container = null;
 
     constructor(container, panels) {
         const cameraSpecs = {
@@ -29,7 +31,8 @@ class WorldScene3 {
         this.#scene = createScene('lightblue');
         this.#renderer = createRenderer();
         this.#loop = new Loop(this.#camera, this.#scene, this.#renderer);
-        container.append(this.#renderer.domElement);
+        // container.append(this.#renderer.domElement);
+        this.#container = container;
 
         this.#controls = new WorldControls(this.#camera, this.#renderer.domElement);
         this.#controls.initPanels(panels);
@@ -97,6 +100,10 @@ class WorldScene3 {
     }
 
     async init() {
+        this.#container.append(this.#renderer.domElement);
+        if (this.#loaded) {
+            return
+        }
         const birdsSpecs = {
             models: [{
                 src: 'assets/models/Parrot.glb',
@@ -123,6 +130,7 @@ class WorldScene3 {
         this.#controls.defControl.saveState();
         this.#loop.updatables.push(birdsGroup);
         this.#scene.add(birdsGroup);
+        this.#loaded = true;
     }
 
     render() {
@@ -190,6 +198,11 @@ class WorldScene3 {
         }
         
         this.#controls.defControl.update();
+    }
+
+    reset() {
+        this.stop();
+        this.#controls.resetCamera();
     }
 
     dispose() {

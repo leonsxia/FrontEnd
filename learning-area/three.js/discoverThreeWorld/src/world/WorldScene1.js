@@ -27,6 +27,8 @@ class WorldScene1 {
     #controls = null;
     #cameraPos = {x: 0, y: 0, z: 20};
     #staticRendering = true;
+    #loaded = false;
+    #container = null;
 
     // 1. Create an instance of the World app   
     constructor(container, panels) {
@@ -37,7 +39,8 @@ class WorldScene1 {
         this.#scene = createScene('#000000');
         this.#renderer = createRenderer();
         this.#loop = new Loop(this.#camera, this.#scene, this.#renderer);
-        container.append(this.#renderer.domElement);
+        // container.append(this.#renderer.domElement);
+        this.#container = container;
 
         this.#controls = new WorldControls(this.#camera, this.#renderer.domElement);
         this.#controls.initPanels(panels);
@@ -99,6 +102,10 @@ class WorldScene1 {
     }
 
     async init() {
+        this.#container.append(this.#renderer.domElement);
+        if (this.#loaded) {
+            return
+        }
         // sphere
         const sphereSpecs = {
             map: 'assets/textures/crate.gif',
@@ -168,6 +175,7 @@ class WorldScene1 {
         ]);
         this.#loop.updatables.push(sphere, cube, box, earth, meshGroup);
         this.#scene.add(sphere, cube, box.mesh, earth.mesh, meshGroup);
+        this.#loaded = true;
     }
 
     render() {
@@ -210,6 +218,11 @@ class WorldScene1 {
     }
 
     focusNext() {}
+
+    reset() {
+        this.stop();
+        this.#controls.resetCamera();
+    }
 
     dispose() {
         // this.#renderer.dispose();

@@ -18,6 +18,8 @@ class WorldScene2 {
     #controls = null;
     #cameraPos = {x: 10, y: 10, z: 10};
     #staticRendering = true;
+    #loaded = false;
+    #container = null;
 
     constructor(container, panels) {
         const cameraSpecs = {
@@ -27,7 +29,8 @@ class WorldScene2 {
         this.#scene = createScene('lightblue');
         this.#renderer = createRenderer();
         this.#loop = new Loop(this.#camera, this.#scene, this.#renderer);
-        container.append(this.#renderer.domElement);
+        // container.append(this.#renderer.domElement);
+        this.#container = container;
 
         this.#controls = new WorldControls(this.#camera, this.#renderer.domElement);
         this.#controls.initPanels(panels);
@@ -95,9 +98,14 @@ class WorldScene2 {
     }
 
     async init() {
+        this.#container.append(this.#renderer.domElement);
+        if (this.#loaded) {
+            return
+        }
         const train = new Train();
         this.#loop.updatables.push(train);
         this.#scene.add(train);
+        this.#loaded = true;
     }
 
     render() {
@@ -132,6 +140,11 @@ class WorldScene2 {
     }
 
     focusNext() {}
+
+    reset() {
+        this.stop();
+        this.#controls.resetCamera();
+    }
 
     dispose() {
         // this.#renderer.dispose();

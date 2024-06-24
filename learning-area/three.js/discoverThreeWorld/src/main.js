@@ -14,6 +14,11 @@ const stopBtn = document.querySelector('#stop');
 const moveCamera = document.querySelector("#moveCamera");
 const resetCamera = document.querySelector("#resetCamera");
 const focusNext = document.querySelector('#focusNext');
+const scenes = [
+    new WorldScene1(container, [leftPanel, rightPanel]), 
+    new WorldScene2(container, [leftPanel, rightPanel]), 
+    new WorldScene3(container, [leftPanel, rightPanel])
+];
 let world;
 
 // create the main function
@@ -27,23 +32,23 @@ function loadWorld(sel) {
     switch(sel) {
         case 'world0':
             resetContainer(1);
-            world = new WorldScene1(container, [leftPanel, rightPanel]);
+            world = scenes[0];
             initWorld(world);
             break;
         case 'world1':
             resetContainer(2);
-            world = new WorldScene2(container, [leftPanel, rightPanel]);
+            world = scenes[1];
             initWorld(world);
             break;
         case 'world2':
             resetContainer(3);
-            world = new WorldScene3(container, [leftPanel, rightPanel]);
+            world = scenes[2];
             initWorld(world);
     }
 }
 
 function resetContainer(num) {
-    if (world) world.dispose();
+    if (world) world.reset();
     header.textContent = `DiscoverThreeJs - World Scene${num}`;
     container.innerHTML = '';
     msg.textContent = 'loading assets...';
