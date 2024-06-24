@@ -3,7 +3,7 @@ import { AnimationClip, NumberKeyframeTrack, VectorKeyframeTrack, AnimationMixer
 function setupModel(data, position) {
     const model = data.scene.children[0];
     const clip = data.animations[0];
-    const { x, y, z } = position;
+    const [ x, y, z ] = position;
     const positionKF = new VectorKeyframeTrack(
         '.position',
         [0, 0.3, 0.6, 0.9, 1.2],

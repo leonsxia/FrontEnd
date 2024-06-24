@@ -131,6 +131,9 @@ class WorldScene1 {
                 depth: 3
             }
         }
+        const box = new BoxCube(boxSpecs);
+        box.setRotation([0.25, -0.25, 0]);
+        box.setPosition([0, 0, 0]);
 
         // earth
         const earthSpecs = {
@@ -140,21 +143,15 @@ class WorldScene1 {
             name: 'earth'
         }
         const earth = new Earth(earthSpecs);
-        earth.setPosition({x:5, y:0, z:0});
-        earth.setRotation({x:0.25, y:0, z:0});
+        earth.setPosition([5, 0, 0]);
+        earth.setRotation([0.25, 0, 0]);
 
         // mesh group
         const meshGroupSpecs = {
-            position: {
-                x: 10,
-                y: 0,
-                z: 0
-            }
+            position: [10, 0, 0]
         };
         const meshGroup = createMeshGroup(meshGroupSpecs);
-        const box = new BoxCube(boxSpecs);
-        box.setRotation({x:0.25, y:-0.25, z:0});
-        box.setPosition({x:0, y:0, z:0});
+        
         await Promise.all([
             Sphere.loadMaterial(sphereSpecs),
             Cube.loadMaterial(cubeSpecs),

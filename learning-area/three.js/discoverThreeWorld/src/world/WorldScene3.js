@@ -92,15 +92,15 @@ class WorldScene3 {
             models: [{
                 src: 'assets/models/Parrot.glb',
                 name: 'parrot',
-                position: { x: 0, y: 3, z: 2.5 }
+                position: [0, 3, 2.5]
             }, {
                 src: 'assets/models/Flamingo.glb',
                 name: 'flamingo',
-                position: { x: 7.5, y: 3, z: -10 }
+                position: [7.5, 3, -10]
             }, {
                 src: 'assets/models/Stork.glb',
                 name: 'stork',
-                position: { x: 0, y: 1.5, z: -10 }
+                position: [0, 1.5, -10]
             }]
         };
 
@@ -151,7 +151,7 @@ class WorldScene3 {
     focusNext() {
         // console.log(this.#loadSequence);
         const birdsGroup = this.#objects.find((obj) => obj.name === 'birdsGroup');
-        const allTargets = birdsGroup.positions.concat({x: 0, y: 0, z: 0});
+        const allTargets = birdsGroup.positions.concat([{x: 0, y: 0, z: 0}]);
         const allCameraPos = birdsGroup.getBirdsCamsPositions(5);
         allCameraPos.push({x: 20, y: 15, z: 20}); // the last view camera position
         
@@ -163,17 +163,19 @@ class WorldScene3 {
             this.#camera.position.copy(allCameraPos[this.#loadSequence]);
             this.#controls.defControl.update();
         } else {
+            const tar = this.#controls.defControl.target;
+            const pos = this.#camera.position
             if (this.#loadSequence === 0) { // move to first position
-                allTargets[allTargets.length - 1] = { x: this.#controls.defControl.target.x, y: this.#controls.defControl.target.y, z: this.#controls.defControl.target.z };
-                allCameraPos[allCameraPos.length - 1] = { x: this.#camera.position.x, y: this.#camera.position.y, z: this.#camera.position.z };
+                allTargets[allTargets.length - 1] = { x: tar.x, y: tar.y, z: tar.z };
+                allCameraPos[allCameraPos.length - 1] = { x: pos.x, y: pos.y, z: pos.z };
 
                 this.#controls.focusNext(
                     allTargets[allTargets.length - 1], allTargets[0],
                     allCameraPos[allCameraPos.length - 1], allCameraPos[0]
                 );
             } else { // move to next bird
-                allTargets[this.#loadSequence - 1] = { x: this.#controls.defControl.target.x, y: this.#controls.defControl.target.y, z: this.#controls.defControl.target.z };
-                allCameraPos[this.#loadSequence - 1] = { x: this.#camera.position.x, y: this.#camera.position.y, z: this.#camera.position.z };
+                allTargets[this.#loadSequence - 1] = { x: tar.x, y: tar.y, z: tar.z };
+                allCameraPos[this.#loadSequence - 1] = { x: pos.x, y: pos.y, z: pos.z };
                 this.#controls.focusNext(
                     allTargets[this.#loadSequence - 1], allTargets[this.#loadSequence],
                     allCameraPos[this.#loadSequence - 1], allCameraPos[this.#loadSequence]

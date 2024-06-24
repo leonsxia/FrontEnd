@@ -3,7 +3,7 @@ import { SphereGeometry, Group, MathUtils, Mesh, MeshStandardMaterial } from 'th
 function createMeshGroup (specs) {
     // a group holds other objects but cannot be seen itself
     const group = new Group();
-    group.position.set(specs.position.x, specs.position.y, specs.position.z);
+    group.position.set(...specs.position);
 
     const sphereGeometry = new SphereGeometry(0.25, 16, 16);
     const material = new MeshStandardMaterial({ color: '#568203' });

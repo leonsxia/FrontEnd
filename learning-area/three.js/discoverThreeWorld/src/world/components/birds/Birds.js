@@ -32,7 +32,8 @@ class BirdsGroup extends Group {
         this.birds = [];
         this.#specs = specs;
         specs.models.forEach((model) => {
-            this.positions.push(model.position);
+            const [x, y, z] = model.position;
+            this.positions.push({x: x, y: y, z: z});
         });
     }
 
@@ -47,7 +48,7 @@ class BirdsGroup extends Group {
             await Promise.all(loadPromises);
             for (let i = 0; i < this.birds.length; i++) {
                 this.add(this.birds[i].mesh);
-                this.birds[i].mesh.position.set(this.#specs.models[i].position.x, this.#specs.models[i].position.y, this.#specs.models[i].position.z);
+                this.birds[i].mesh.position.set(...this.#specs.models[i].position);
             }
         } catch (err) {
             console.log(`load birds err: ${err}`);

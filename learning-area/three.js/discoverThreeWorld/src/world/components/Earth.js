@@ -34,11 +34,11 @@ class Earth {
     }
 
     setPosition(pos) {
-        this.#mesh.position.set(pos.x, pos.y, pos.z);
+        this.#mesh.position.set(...pos);
     }
 
     setRotation(trans) {
-        this.#mesh.rotation.set(trans.x, trans.y, trans.z);
+        this.#mesh.rotation.set(...trans);
     }
 
     get mesh() {
