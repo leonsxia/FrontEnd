@@ -70,8 +70,8 @@ class WorldControls {
             const camX = this.#thisCamera.position.x.toFixed(4);
             const camY = this.#thisCamera.position.y.toFixed(4);
             const camZ = this.#thisCamera.position.z.toFixed(4);
-            if (this.coordinatesEqual({x: this.#preTarget.x, y: this.#preTarget.y, z: this.#preTarget.z}, {x: tarX, y: tarY, z: tarZ}) && 
-                this.coordinatesEqual({x: this.#preCamPos.x, y: this.#preCamPos.y, z: this.#preCamPos.z}, {x: camX, y: camY, z: camZ})) {
+            if (this.coordinatesEqual(this.#preTarget, {x: tarX, y: tarY, z: tarZ}) && 
+                this.coordinatesEqual(this.#preCamPos, {x: camX, y: camY, z: camZ})) {
                 this.setPanelState(false);
             } else {
                 this.setPanelState(true);
