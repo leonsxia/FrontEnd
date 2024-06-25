@@ -64,11 +64,10 @@ class BirdsGroup extends Group {
 
     getBirdsCamsPositions(dist) {
         const dirVec3 = new Vector3(-dist, dist, dist);
-        const focusCamPositions = [];
-        this.positions.forEach((pos) => {
+        const focusCamPositions = this.positions.map((pos) => {
             const origin = new Vector3(pos.x, pos.y, pos.z);
             const newCamPos = origin.add(dirVec3);
-            focusCamPositions.push({x: newCamPos.x, y: newCamPos.y, z: newCamPos.z});
+            return { x: newCamPos.x, y: newCamPos.y, z: newCamPos.z };
         });
         return focusCamPositions;
     }
