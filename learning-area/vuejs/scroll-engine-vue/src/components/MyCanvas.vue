@@ -23,8 +23,14 @@ export default {
     mounted() {
         this.provider.context = this.$refs['my-canvas'].getContext('2d');
 
-        this.$refs['my-canvas'].width = 500;
-        this.$refs['my-canvas'].height = 500 * 9 / 16;
+        const width = 500;
+        const height = 500 * 9 / 16;
+        const scale = window.devicePixelRatio;
+        this.$refs['my-canvas'].style.width = `${width}px`;
+        this.$refs['my-canvas'].style.height = `${height}px`;
+        this.$refs['my-canvas'].width = width * scale;
+        this.$refs['my-canvas'].height = height * scale;
+        this.provider.context.scale(scale, scale);
     },
 };
 </script>

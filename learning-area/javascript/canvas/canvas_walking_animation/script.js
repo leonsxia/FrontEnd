@@ -1,7 +1,13 @@
 const canvas = document.querySelector('.myCanvas');
-const width = canvas.width = window.innerWidth;
-const height = canvas.height = window.innerHeight;
+const width = window.innerWidth;
+const height = window.innerHeight;
+const devicePixelRatio = window.devicePixelRatio;
+canvas.width = width * devicePixelRatio;
+canvas.height = height * devicePixelRatio;
+canvas.style.width = `${width}px`;
+canvas.style.height = `${height}px`;
 const ctx = canvas.getContext('2d');
+ctx.scale(devicePixelRatio, devicePixelRatio);
 const groundLevel = height / 4;
 const centerLineX = 0;
 const centerLeft = -10;

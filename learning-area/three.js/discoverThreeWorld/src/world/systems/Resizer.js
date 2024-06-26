@@ -5,11 +5,17 @@ const setSize = (container, camera, renderer) => {
     // Update the camera's frustum
     camera.updateProjectionMatrix();
 
-    // Update the size of the renderer and the canvas
-    renderer.setSize(container.clientWidth, container.clientHeight);
-
     // Set the pixel ratio (for mobile devices)
     renderer.setPixelRatio(window.devicePixelRatio);
+
+    // Update the size of the renderer and the canvas
+    const devicePixelRatio = window.devicePixelRatio;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    // renderer.domElement.style.width = `${container.clientWidth}px`;
+    // renderer.domElement.style.height = `${container.clientHeight}px`;
+    // renderer.setScissorTest(true);
+    // renderer.setScissor(0, 0, container.clientWidth / 2, container.clientHeight / 2);
+    // renderer.setViewport(0, 0, container.clientWidth / 2, container.clientHeight / 2);
   };
 
 class Resizer {
