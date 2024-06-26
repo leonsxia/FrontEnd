@@ -9,7 +9,6 @@ const setSize = (container, camera, renderer) => {
     renderer.setPixelRatio(window.devicePixelRatio);
 
     // Update the size of the renderer and the canvas
-    const devicePixelRatio = window.devicePixelRatio;
     renderer.setSize(container.clientWidth, container.clientHeight);
     // renderer.domElement.style.width = `${container.clientWidth}px`;
     // renderer.domElement.style.height = `${container.clientHeight}px`;
