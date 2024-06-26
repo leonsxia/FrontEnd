@@ -1,3 +1,4 @@
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { createCamera } from './components/camera.js';
 import { createScene } from './components/scene.js';
 
@@ -14,6 +15,7 @@ class WorldScene {
     controls = null;
     container = null;
     staticRendering = true;
+    gui = new GUI();
 
     constructor(container, panels, renderer, specs) {
         this.renderer = renderer;
@@ -41,6 +43,8 @@ class WorldScene {
     initContainer() {
         this.container.append(this.renderer.domElement);
         this.controls.defControl.enabled = true;
+        this.gui.show();
+        this.initGUIControl();
     }
 
     render() {
@@ -88,6 +92,8 @@ class WorldScene {
         this.stop();
         this.controls.resetCamera();
         this.controls.defControl.enabled = false;
+        this.gui.hide();
+        this.gui.reset();
     }
 
     dispose() {

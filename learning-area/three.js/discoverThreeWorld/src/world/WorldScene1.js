@@ -13,10 +13,22 @@ const worldSceneSpecs = {
     scene: {
         backgroundColor: '#000000'
     }
+};
+const mainLightCtlSpecs = {
+    mainLightColor: [255, 255, 255]
+};
+const pointLightCtlSpecs = {
+    pointLightColor: [255, 255, 0]
+};
+const hemisphereLightCtlSpecs = {
+    hemisphereLightGroundColor: [47, 79, 79],
+    hemisphereLightSkyColor: [160, 160, 160]
 }
 
 class WorldScene1 extends WorldScene  {
     #loaded = false;
+    #guiLoaded = false;
+    #lights = { mainLight: null, pointLight: null, ambientLight: null, hemisphereLight: null };
 
     // 1. Create an instance of the World app   
     constructor(container, panels, renderer) {
@@ -27,7 +39,7 @@ class WorldScene1 extends WorldScene  {
             intensity: 8,
             position: [-10, 10, 10]
         };
-        const spotLightSpecs = {
+        const pointLightSpecs = {
             color: 0xffff00,
             position: [0, 0, 0],
             intensity: 50,
@@ -44,12 +56,12 @@ class WorldScene1 extends WorldScene  {
             intensity: 15,
             position: [0, 1, 0] // light emit from top to bottom
         };
-        const { mainLight, pointLight, ambientLight, hemisphereLight } = createLights(directLightSpecs, spotLightSpecs, ambientLightSpecs, hemisphereLightSpecs);
+        this.#lights = createLights(directLightSpecs, pointLightSpecs, ambientLightSpecs, hemisphereLightSpecs);
 
-        this.camera.add(pointLight);
+        this.camera.add(this.#lights.pointLight);
         
         this.loop.updatables = [this.controls.defControl];
-        this.scene.add(mainLight, hemisphereLight, this.camera);
+        this.scene.add(this.#lights.mainLight, this.#lights.hemisphereLight, this.camera);
 
         return {
             renderer: this.renderer,
@@ -138,6 +150,40 @@ class WorldScene1 extends WorldScene  {
         this.scene.add(sphere, cube, box.mesh, earth.mesh, meshGroup);
         this.initContainer();
         this.#loaded = true;
+    }
+
+    initGUIControl() {
+        if (this.#guiLoaded) return;
+        this.#guiLoaded = true;
+        const folder1 = this.gui.addFolder('Directional Light');
+        folder1.addColor(mainLightCtlSpecs, 'mainLightColor', 255);
+        folder1.add(this.#lights.mainLight, 'intensity', 0, 20);
+        const folder2 = this.gui.addFolder('Point Light');
+        folder2.addColor(pointLightCtlSpecs, 'pointLightColor', 255);
+        folder2.add(this.#lights.pointLight, 'intensity', 0, 50);
+        const folder3 = this.gui.addFolder('Hemisphere Light');
+        folder3.addColor(hemisphereLightCtlSpecs, 'hemisphereLightSkyColor', 255);
+        folder3.addColor(hemisphereLightCtlSpecs, 'hemisphereLightGroundColor', 255);
+        folder3.add(this.#lights.hemisphereLight, 'intensity', 0, 50);
+        this.gui.onChange((event) => {
+            const val = event.value;
+            const color = `rgb(${val[0]},${val[1]},${val[2]})`;
+            switch (event.property) {
+                case 'mainLightColor':
+                    this.#lights.mainLight.color.setStyle(color);
+                    break;
+                case 'pointLightColor':
+                    this.#lights.pointLight.color.setStyle(color);
+                    break;
+                case 'hemisphereLightSkyColor':
+                    this.#lights.hemisphereLight.color.setStyle(color);
+                    break;
+                case 'hemisphereLightGroundColor':
+                    this.#lights.hemisphereLight.groundColor.setStyle(color);
+                    break;
+            }
+            if (this.staticRendering) this.render();
+        });
     }
 }
 
