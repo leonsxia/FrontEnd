@@ -13,7 +13,6 @@ const worldSceneSpecs = {
 }
 
 class WorldScene2 extends WorldScene {
-    #cameraPos = {x: 10, y: 10, z: 10};
     #loaded = false;
 
     constructor(container, panels, renderer) {
