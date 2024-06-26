@@ -152,8 +152,6 @@ class WorldControls {
                 this.#controls.target.add(tarDirNormal.clone().multiplyScalar(tarVelPerSec * delta));
                 this.#controls.update();
             } else {
-                this.#thisCamera.position.copy(pos1Vec3);
-                this.#controls.target.copy(tar1Vec3);
                 this.resetTick();
                 this.setPanelState(false);
             }
