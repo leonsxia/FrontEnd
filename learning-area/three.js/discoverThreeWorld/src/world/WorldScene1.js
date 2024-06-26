@@ -1,50 +1,27 @@
-import { createCamera } from './components/camera.js';
 import * as Cube from './components/cube.js';
 import { Earth } from './components/Earth.js';
 import { BoxCube } from './components/BoxCube.js';
 import * as Sphere from './components/sphere.js';
 import { createLights } from './components/lights.js';
 import { createMeshGroup } from './components/meshGroup.js';
-import { createScene } from './components/scene.js';
+import { WorldScene } from './WorldScene.js';
 
-import { WorldControls } from './systems/Controls.js';
-import { createRenderer } from './systems/renderer.js';
-import { Resizer } from './systems/Resizer.js';
-import { Loop } from './systems/Loop.js';
+const worldSceneSpecs = {
+    camera: {
+        position: [0, 0, 20]
+    },
+    scene: {
+        backgroundColor: '#000000'
+    }
+}
 
-// These variables are module-scoped: we cannot access them
-// from outside the module
-// let camera;
-// let renderer;
-// let scene;
-
-class WorldScene1 {
-    #camera = null;
-    #scene = null;
-    #renderer = null;
-    #loop = null;
-    #resizer = null;
-    #controls = null;
-    #cameraPos = {x: 0, y: 0, z: 20};
-    #staticRendering = true;
+class WorldScene1 extends WorldScene  {
     #loaded = false;
-    #container = null;
 
     // 1. Create an instance of the World app   
-    constructor(container, panels) {
-        const cameraSpecs = {
-            position: this.#cameraPos
-        }
-        this.#camera = createCamera(cameraSpecs);
-        this.#scene = createScene('#000000');
-        this.#renderer = createRenderer();
-        this.#loop = new Loop(this.#camera, this.#scene, this.#renderer);
-        // container.append(this.#renderer.domElement);
-        this.#container = container;
-
-        this.#controls = new WorldControls(this.#camera, this.#renderer.domElement);
-        this.#controls.initPanels(panels);
-
+    constructor(container, panels, renderer) {
+        super(container, panels, renderer, worldSceneSpecs);
+        
         const directLightSpecs = {
             color: 'white',
             intensity: 8,
@@ -69,30 +46,29 @@ class WorldScene1 {
         };
         const { mainLight, pointLight, ambientLight, hemisphereLight } = createLights(directLightSpecs, spotLightSpecs, ambientLightSpecs, hemisphereLightSpecs);
 
-        this.#camera.add(pointLight);
+        this.camera.add(pointLight);
+        
+        this.loop.updatables = [this.controls.defControl];
+        this.scene.add(mainLight, hemisphereLight, this.camera);
 
-        // this.#controls.target.copy(earth.mesh.position);
-        // this.#controls.enablePan = false;
-        this.#controls.defControl.listenToKeyEvents(window);
-
-        this.#loop.updatables = [this.#controls.defControl];
-        this.#scene.add(mainLight, hemisphereLight, this.#camera);
-
-        this.#resizer = new Resizer(container, this.#camera, this.#renderer);
-        this.#resizer.onResize = 
-        // cube.onTextureLoad = sphere.onTextureLoad = 
-        // earth.onTextureLoad = box.onTextureLoad = 
-        () => {
-            this.render();
+        return {
+            renderer: this.renderer,
+            init: this.init.bind(this), 
+            render: this.render.bind(this),
+            start: this.start.bind(this),
+            stop: this.stop.bind(this),
+            moveCamera: this.moveCamera.bind(this),
+            resetCamera: this.resetCamera.bind(this),
+            focusNext: this.focusNext.bind(this),
+            reset: this.reset.bind(this),
+            dispose: this.dispose.bind(this)
         };
-
-        this.#controls.defControl.addEventListener('change', () => this.render());
     }
 
     async init() {
-        this.#container.append(this.#renderer.domElement);
         if (this.#loaded) {
-            return
+            this.initContainer();
+            return;
         }
         // sphere
         const sphereSpecs = {
@@ -158,60 +134,10 @@ class WorldScene1 {
             box.init(boxSpecs),
             earth.init(earthSpecs)
         ]);
-        this.#loop.updatables.push(sphere, cube, box, earth, meshGroup);
-        this.#scene.add(sphere, cube, box.mesh, earth.mesh, meshGroup);
+        this.loop.updatables.push(sphere, cube, box, earth, meshGroup);
+        this.scene.add(sphere, cube, box.mesh, earth.mesh, meshGroup);
+        this.initContainer();
         this.#loaded = true;
-    }
-
-    render() {
-        this.#renderer.render(this.#scene, this.#camera);
-    }
-
-    start() {
-        this.#staticRendering = false;
-        this.#controls.initPreCoordinates();
-        this.#controls.defControl.enableDamping = true;
-        this.#controls.defControl.dampingFactor = 0.1; // default 0.05
-        this.#loop.start();
-    }
-
-    stop() {
-        this.#staticRendering = true;
-        this.#controls.defControl.enableDamping = false;
-        this.#loop.stop();
-    }
-
-    update() {
-        this.#scene.children.forEach((object) => {
-            object.rotation.y += 0.0025;
-        })
-        this.render();
-        window.requestAnimationFrame(this.update.bind(this));
-    }
-
-    moveCamera() {
-        const moveDist = 5;
-        if (this.#staticRendering) {
-            this.#controls.moveCameraStatic(moveDist);
-        } else {
-            this.#controls.moveCamera(moveDist);
-        }
-    }
-
-    resetCamera() {
-        this.#controls.resetCamera();
-    }
-
-    focusNext() {}
-
-    reset() {
-        this.stop();
-        this.#controls.resetCamera();
-    }
-
-    dispose() {
-        // this.#renderer.dispose();
-        // this.#renderer.forceContextLoss();
     }
 }
 

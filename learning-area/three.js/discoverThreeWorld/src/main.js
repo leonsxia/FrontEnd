@@ -1,6 +1,7 @@
-import { WorldScene1 } from "./world/WorldScene1";
-import { WorldScene2 } from "./world/WorldScene2";
-import { WorldScene3 } from "./world/WorldScene3";
+// import { WorldScene1 } from "./world/WorldScene1";
+// import { WorldScene2 } from "./world/WorldScene2";
+// import { WorldScene3 } from "./world/WorldScene3";
+import { World } from "./world/World";
 
 const container = document.querySelector('#scene-container');
 const header = document.querySelector('#sceneTitle');
@@ -14,11 +15,7 @@ const stopBtn = document.querySelector('#stop');
 const moveCamera = document.querySelector("#moveCamera");
 const resetCamera = document.querySelector("#resetCamera");
 const focusNext = document.querySelector('#focusNext');
-const scenes = [
-    new WorldScene1(container, [leftPanel, rightPanel]), 
-    new WorldScene2(container, [leftPanel, rightPanel]), 
-    new WorldScene3(container, [leftPanel, rightPanel])
-];
+const scenes = new World(container, [leftPanel, rightPanel]).worldScenes;
 let world;
 
 // create the main function
@@ -56,6 +53,7 @@ function resetContainer(num) {
 
 async function initWorld(world) {
     await world.init();
+    console.log(world.renderer.name);
     msg.textContent = 'assets all loaded.'
     world.render();
 }

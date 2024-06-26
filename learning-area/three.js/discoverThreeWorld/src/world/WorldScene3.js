@@ -1,41 +1,24 @@
-import { createCamera } from './components/camera.js';
 import { createAxesHelper, createGridHelper } from './components/helpers.js';
 import { createLights } from './components/lights.js';
-import { createScene } from './components/scene.js';
 import { BirdsGroup } from './components/birds/Birds.js'
+import { WorldScene } from './WorldScene.js';
 
-import { WorldControls } from './systems/Controls.js';
-import { createRenderer } from './systems/renderer.js';
-import { Resizer } from './systems/Resizer.js';
-import { Loop } from './systems/Loop.js';
+const worldSceneSpecs = {
+    camera: {
+        position: [-1.5, 4.5, 6.5]
+    },
+    scene: {
+        backgroundColor: 'lightblue'
+    }
+}
 
-class WorldScene3 {
-    #camera = null;
-    #scene = null;
-    #renderer = null;
-    #loop = null;
-    #resizer = null;
-    #controls = null;
+class WorldScene3 extends WorldScene {
     #loadSequence = 0;
-    #cameraPos = {x: -1.5, y: 4.5, z: 6.5};
-    #staticRendering = true;
     #objects = [];
     #loaded = false;
-    #container = null;
 
-    constructor(container, panels) {
-        const cameraSpecs = {
-            position: this.#cameraPos
-        }
-        this.#camera = createCamera(cameraSpecs);
-        this.#scene = createScene('lightblue');
-        this.#renderer = createRenderer();
-        this.#loop = new Loop(this.#camera, this.#scene, this.#renderer);
-        // container.append(this.#renderer.domElement);
-        this.#container = container;
-
-        this.#controls = new WorldControls(this.#camera, this.#renderer.domElement);
-        this.#controls.initPanels(panels);
+    constructor(container, panels, renderer) {
+        super(container, panels, renderer, worldSceneSpecs);
 
         const directLightSpecs = {
             color: 'white',
@@ -61,7 +44,7 @@ class WorldScene3 {
         };
         const { mainLight, pointLight, ambientLight, hemisphereLight } = createLights(directLightSpecs, spotLightSpecs, ambientLightSpecs, hemisphereLightSpecs);
 
-        this.#camera.add(pointLight);
+        this.camera.add(pointLight);
 
         const axesSpecs = {
             size: 3,
@@ -71,21 +54,26 @@ class WorldScene3 {
             size: 20,
             divisions: 20
         }
-        this.#loop.updatables = [this.#controls.defControl];
-        this.#scene.add(mainLight, hemisphereLight, this.#camera, createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
+        this.loop.updatables = [this.controls.defControl];
+        this.scene.add(mainLight, hemisphereLight, this.camera, createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
 
-        this.#resizer = new Resizer(container, this.#camera, this.#renderer);
-        this.#resizer.onResize =
-        () => {
-            this.render();
+        return {
+            renderer: this.renderer,
+            init: this.init.bind(this), 
+            render: this.render.bind(this),
+            start: this.start.bind(this),
+            stop: this.stop.bind(this),
+            moveCamera: this.moveCamera.bind(this),
+            resetCamera: this.resetCamera.bind(this),
+            focusNext: this.focusNext.bind(this),
+            reset: this.reset.bind(this),
+            dispose: this.dispose.bind(this)
         };
-
-        this.#controls.defControl.addEventListener('change', () => this.render());
     }
 
     async init() {
-        this.#container.append(this.#renderer.domElement);
         if (this.#loaded) {
+            this.initContainer();
             return
         }
         const birdsSpecs = {
@@ -109,43 +97,13 @@ class WorldScene3 {
         this.#objects.push(birdsGroup);
         await birdsGroup.loadBirds();
         // move the target to the center of the front bird
-        this.#controls.defControl.target.copy(birdsGroup.getBirds(0).position);
-        this.#controls.defControl.update();
-        this.#controls.defControl.saveState();
-        this.#loop.updatables.push(birdsGroup);
-        this.#scene.add(birdsGroup);
+        this.controls.defControl.target.copy(birdsGroup.getBirds(0).position);
+        this.controls.defControl.update();
+        this.controls.defControl.saveState();
+        this.loop.updatables.push(birdsGroup);
+        this.scene.add(birdsGroup);
+        this.initContainer();
         this.#loaded = true;
-    }
-
-    render() {
-        this.#renderer.render(this.#scene, this.#camera);
-    }
-
-    start() {
-        this.#staticRendering = false;
-        this.#controls.initPreCoordinates();
-        this.#controls.defControl.enableDamping = true;
-        this.#controls.defControl.dampingFactor = 0.1; // default 0.05
-        this.#loop.start();
-    }
-
-    stop() {
-        this.#staticRendering = true;
-        this.#controls.defControl.enableDamping = false;
-        this.#loop.stop();
-    }
-
-    moveCamera() {
-        const moveDist = 5;
-        if (this.#staticRendering) {
-            this.#controls.moveCameraStatic(moveDist);
-        } else {
-            this.#controls.moveCamera(moveDist);
-        }
-    }
-
-    resetCamera() {
-        this.#controls.resetCamera();
     }
 
     focusNext() {
@@ -158,42 +116,32 @@ class WorldScene3 {
         if (++this.#loadSequence === allTargets.length) {
             this.#loadSequence = 0;
         }
-        if (this.#staticRendering) {
-            this.#controls.defControl.target.copy(allTargets[this.#loadSequence]);
-            this.#camera.position.copy(allCameraPos[this.#loadSequence]);
-            this.#controls.defControl.update();
+        if (this.staticRendering) {
+            this.controls.defControl.target.copy(allTargets[this.#loadSequence]);
+            this.camera.position.copy(allCameraPos[this.#loadSequence]);
+            this.controls.defControl.update();
         } else {
-            const tar = this.#controls.defControl.target;
-            const pos = this.#camera.position
+            const tar = this.controls.defControl.target;
+            const pos = this.camera.position
             if (this.#loadSequence === 0) { // move to first position
                 allTargets[allTargets.length - 1] = { x: tar.x, y: tar.y, z: tar.z };
                 allCameraPos[allCameraPos.length - 1] = { x: pos.x, y: pos.y, z: pos.z };
 
-                this.#controls.focusNext(
+                this.controls.focusNext(
                     allTargets[allTargets.length - 1], allTargets[0],
                     allCameraPos[allCameraPos.length - 1], allCameraPos[0]
                 );
             } else { // move to next bird
                 allTargets[this.#loadSequence - 1] = { x: tar.x, y: tar.y, z: tar.z };
                 allCameraPos[this.#loadSequence - 1] = { x: pos.x, y: pos.y, z: pos.z };
-                this.#controls.focusNext(
+                this.controls.focusNext(
                     allTargets[this.#loadSequence - 1], allTargets[this.#loadSequence],
                     allCameraPos[this.#loadSequence - 1], allCameraPos[this.#loadSequence]
                 );
             }
         }
         
-        this.#controls.defControl.update();
-    }
-
-    reset() {
-        this.stop();
-        this.#controls.resetCamera();
-    }
-
-    dispose() {
-        // this.#renderer.dispose();
-        // this.#renderer.forceContextLoss();
+        this.controls.defControl.update();
     }
 }
 

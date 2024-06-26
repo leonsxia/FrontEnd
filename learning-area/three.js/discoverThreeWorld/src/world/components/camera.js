@@ -9,7 +9,7 @@ function createCamera(spc) {
     );
 
     // move the camera back so we can view the scene
-    camera.position.set(spc.position.x, spc.position.y, spc.position.z);
+    camera.position.set(...spc.position);
 
     return camera;
 }

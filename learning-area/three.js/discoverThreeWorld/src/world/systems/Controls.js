@@ -24,6 +24,7 @@ class WorldControls {
         this.#controls.update();
     
         this.resetTick();
+        this.#controls.enabled = false;
     }
 
     // dispose() {
