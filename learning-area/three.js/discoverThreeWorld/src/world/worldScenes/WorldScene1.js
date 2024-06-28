@@ -6,13 +6,16 @@ import { createLights } from '../components/lights.js';
 import { createMeshGroup } from '../components/meshGroup.js';
 import { WorldScene } from './WorldScene.js';
 
+const sceneName = 'scene1';
 const worldSceneSpecs = {
+    name: sceneName,
     camera: {
         position: [0, 0, 20]
     },
     scene: {
         backgroundColor: '#000000'
-    }
+    },
+    enableGui: true
 };
 const mainLightCtlSpecs = {
     mainLightColor: [255, 255, 255]
@@ -25,9 +28,8 @@ const hemisphereLightCtlSpecs = {
     hemisphereLightSkyColor: [160, 160, 160]
 };
 
-const guiSpecs = {
+const guiRightSpecs = {
     parents: [],
-    attachedTo: null,
     details: [{
         folder: 'Directional Light',
         parent: 'mainLight',
@@ -83,8 +85,9 @@ class WorldScene1 extends WorldScene  {
     #lights = { mainLight: null, pointLight: null, ambientLight: null, hemisphereLight: null };
 
     // 1. Create an instance of the World app   
-    constructor(container, panels, renderer) {
-        super(container, panels, renderer, worldSceneSpecs);
+    constructor(container, renderer, globalConfig) {
+        Object.assign(worldSceneSpecs, globalConfig)
+        super(container, renderer, worldSceneSpecs);
         
         const directLightSpecs = {
             color: 'white',
@@ -115,12 +118,32 @@ class WorldScene1 extends WorldScene  {
         this.loop.updatables = [this.controls.defControl];
         this.scene.add(this.#lights.mainLight, this.#lights.hemisphereLight, this.camera);
 
-        guiSpecs.parents.push({name: 'mainLight', value: this.#lights.mainLight});
-        guiSpecs.parents.push({name: 'pointLight', value: this.#lights.pointLight});
-        guiSpecs.parents.push({name: 'hemisphereLight', value: this.#lights.hemisphereLight});
-        guiSpecs.attachedTo = this;
-        this.guiSpecs = guiSpecs;
+        if (worldSceneSpecs.enableGui) {
+            guiRightSpecs.parents.push({ name: 'mainLight', value: this.#lights.mainLight });
+            guiRightSpecs.parents.push({ name: 'pointLight', value: this.#lights.pointLight });
+            guiRightSpecs.parents.push({ name: 'hemisphereLight', value: this.#lights.hemisphereLight });
+            this.guiRightSpecs = guiRightSpecs;
+            this.guiLeftSpecs.parents.push({
+                name: 'actions',
+                value: {
+                    start: this.start.bind(this),
+                    stop: this.stop.bind(this),
+                    moveCamera: this.moveCamera.bind(this),
+                    resetCamera: this.resetCamera.bind(this),
+                    focusNext: this.focusNext.bind(this)
+                }
+            });
+            this.guiLeftSpecs.details.push({
+                folder: 'Actions',
+                parent: 'actions',
+                specs: [{
+                    value: null,
+                    type: 'function'
+                }]
+            });
+        }
         return {
+            name: this.name,
             renderer: this.renderer,
             init: this.init.bind(this), 
             render: this.render.bind(this),

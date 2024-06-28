@@ -32,8 +32,10 @@ class WorldControls {
     //     this.#thisCamera = null;
     // }
 
-    initPanels(panels) {
-        this.#panels = panels;
+    initPanels(gui) {
+        if (gui) {
+            this.#panels.push(gui.leftPanel);
+        }
     }
 
     get defControl() {
@@ -45,19 +47,16 @@ class WorldControls {
     }
 
     setPanelState(disabled) {
-        this.#panels.forEach((panel) => {
-            const buttons = panel.querySelectorAll('button');
-            const selects = panel.querySelectorAll('select');
-            if (buttons.length > 0) {
-                buttons.forEach((btn) => {
-                    btn.disabled = disabled;
+        if (this.#panels.length === 0) return;
+        this.#panels.forEach(panel => {
+            panel.children.forEach((child) => {
+                child.controllers.forEach(ctl => {
+                    if (disabled)
+                        ctl.disable();
+                    else
+                        ctl.enable();
                 });
-            }
-            if (selects.length > 0) {
-                selects.forEach((sel) => {
-                    sel.disabled = disabled;
-                });
-            }
+            });
         });
     }
     

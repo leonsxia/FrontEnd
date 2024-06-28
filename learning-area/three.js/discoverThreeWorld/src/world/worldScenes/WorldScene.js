@@ -7,6 +7,7 @@ import { Loop } from '../systems/Loop.js';
 import { Gui } from '../systems/Gui.js';
 
 class WorldScene {
+    name = 'default scene';
     camera = null;
     scene = null;
     renderer = null;
@@ -15,10 +16,12 @@ class WorldScene {
     controls = null;
     container = null;
     staticRendering = true;
-    gui = new Gui();
-    guiSpecs = {};
+    gui = null;
+    guiRightSpecs = {};
+    guiLeftSpecs = {};
 
-    constructor(container, panels, renderer, specs) {
+    constructor(container, renderer, specs) {
+        this.name = specs.name;
         this.renderer = renderer;
         this.camera = createCamera(specs.camera);
         this.scene = createScene(specs.scene.backgroundColor);
@@ -26,7 +29,6 @@ class WorldScene {
         this.container = container;
 
         this.controls = new WorldControls(this.camera, this.renderer.domElement);
-        this.controls.initPanels(panels);
 
         this.controls.defControl.listenToKeyEvents(window);
 
@@ -37,17 +39,40 @@ class WorldScene {
         };
 
         this.controls.defControl.addEventListener('change', () => this.render());
+
+        if (specs.enableGui) {
+            this.gui = new Gui();
+            this.controls.initPanels(this.gui);
+            this.guiLeftSpecs = {
+                parents: [{
+                    name: 'selectWorld',
+                    value: specs.changeCallback
+                }],
+                details: [{
+                    folder: 'Select World',
+                    parent: 'selectWorld',
+                    specs: [{
+                        name: 'scene',
+                        value: { scene: specs.name },
+                        params: specs.scenes,
+                        type: 'scene-dropdown'
+                    }]
+                }]
+            };
+        }
     }
 
     initContainer() {
         this.container.append(this.renderer.domElement);
         this.controls.defControl.enabled = true;
-        this.gui.show();
-        this.initGUIControl();
+        if (this.gui) {
+            this.gui.show();
+            this.initGUIControl();
+        }
     }
 
     initGUIControl() {
-        this.gui.init(this.guiSpecs);
+        this.gui.init({ attachedTo: this, left: this.guiLeftSpecs, right: this.guiRightSpecs });
     }
 
     render() {
@@ -95,8 +120,10 @@ class WorldScene {
         this.stop();
         this.controls.resetCamera();
         this.controls.defControl.enabled = false;
-        this.gui.hide();
-        this.gui.reset();
+        if (this.gui) {
+            this.gui.hide();
+            this.gui.reset();
+        }
     }
 
     dispose() {
