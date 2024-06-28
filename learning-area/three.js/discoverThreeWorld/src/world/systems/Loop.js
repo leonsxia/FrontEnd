@@ -19,14 +19,16 @@ class Loop {
     //     this.#camera = this.#scene = this.#renderer = null;
     // }
 
-    start() {
+    start(stats) {
         this.reset();
         this.#renderer.setAnimationLoop(() => {
+            stats.begin();
             // tell every animated object to tick forward one frame
             this.tick();
 
             // render a frame
             this.#renderer.render(this.#scene, this.#camera);
+            stats.end();
         });
     }
 

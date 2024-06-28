@@ -1,7 +1,9 @@
-import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
+import { GUI } from 'lil-gui';
+import Stats from 'stats.js';
 
 class Gui {
     #guis = [];
+    #stats = null;
     #objects = [];
     #attachedTo;
     #guiLoaded = false;
@@ -14,11 +16,18 @@ class Gui {
         this.#guis.forEach(gui => gui.hide());
     }
 
+    get stats() {
+        return this.#stats;
+    }
+
     get leftPanel() {
         return this.#guis[0];
     }
 
     init(specs) {
+        this.#stats = new Stats();
+        this.#stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild(this.#stats.dom);
         if (this.#guiLoaded) return;
         this.#guiLoaded = true;
         this.#objects = specs.left.parents.concat(specs.right.parents);
@@ -29,7 +38,7 @@ class Gui {
 
     initLeft(specs) {
         this.#guis[0].domElement.style.setProperty('left', '0');
-        this.#guis[0].domElement.style.setProperty('top', '30px');
+        this.#guis[0].domElement.style.setProperty('top', '70px');
         const eventObjs = [];
         this.addControl(this.#guis[0], specs, eventObjs);
         this.bindChange(this.#guis[0], eventObjs);
@@ -136,6 +145,7 @@ class Gui {
     reset() {
         this.#guis.forEach(gui => gui.reset());
         this.#sceneChanged = false;
+        document.body.removeChild(this.#stats.dom);
     }
 }
 

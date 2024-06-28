@@ -84,7 +84,7 @@ class WorldScene {
         this.controls.initPreCoordinates();
         this.controls.defControl.enableDamping = true;
         this.controls.defControl.dampingFactor = 0.1; // default 0.05
-        this.loop.start();
+        this.loop.start(this.gui.stats);
     }
 
     stop() {
