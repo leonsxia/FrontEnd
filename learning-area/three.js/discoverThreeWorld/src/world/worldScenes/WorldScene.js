@@ -1,10 +1,10 @@
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { createCamera } from './components/camera.js';
-import { createScene } from './components/scene.js';
+import { createCamera } from '../components/camera.js';
+import { createScene } from '../components/scene.js';
 
-import { WorldControls } from './systems/Controls.js';
-import { Resizer } from './systems/Resizer.js';
-import { Loop } from './systems/Loop.js';
+import { WorldControls } from '../systems/Controls.js';
+import { Resizer } from '../systems/Resizer.js';
+import { Loop } from '../systems/Loop.js';
+import { Gui } from '../systems/Gui.js';
 
 class WorldScene {
     camera = null;
@@ -15,7 +15,8 @@ class WorldScene {
     controls = null;
     container = null;
     staticRendering = true;
-    gui = new GUI();
+    gui = new Gui();
+    guiSpecs = {};
 
     constructor(container, panels, renderer, specs) {
         this.renderer = renderer;
@@ -27,8 +28,6 @@ class WorldScene {
         this.controls = new WorldControls(this.camera, this.renderer.domElement);
         this.controls.initPanels(panels);
 
-        // this.#controls.target.copy(earth.mesh.position);
-        // this.#controls.enablePan = false;
         this.controls.defControl.listenToKeyEvents(window);
 
         this.#resizer = new Resizer(container, this.camera, this.renderer);
@@ -45,6 +44,10 @@ class WorldScene {
         this.controls.defControl.enabled = true;
         this.gui.show();
         this.initGUIControl();
+    }
+
+    initGUIControl() {
+        this.gui.init(this.guiSpecs);
     }
 
     render() {

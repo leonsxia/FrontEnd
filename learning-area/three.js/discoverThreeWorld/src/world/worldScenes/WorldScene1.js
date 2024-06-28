@@ -1,9 +1,9 @@
-import * as Cube from './components/cube.js';
-import { Earth } from './components/Earth.js';
-import { BoxCube } from './components/BoxCube.js';
-import * as Sphere from './components/sphere.js';
-import { createLights } from './components/lights.js';
-import { createMeshGroup } from './components/meshGroup.js';
+import * as Cube from '../components/cube.js';
+import { Earth } from '../components/Earth.js';
+import { BoxCube } from '../components/BoxCube.js';
+import * as Sphere from '../components/sphere.js';
+import { createLights } from '../components/lights.js';
+import { createMeshGroup } from '../components/meshGroup.js';
 import { WorldScene } from './WorldScene.js';
 
 const worldSceneSpecs = {
@@ -23,11 +23,63 @@ const pointLightCtlSpecs = {
 const hemisphereLightCtlSpecs = {
     hemisphereLightGroundColor: [47, 79, 79],
     hemisphereLightSkyColor: [160, 160, 160]
-}
+};
+
+const guiSpecs = {
+    parents: [],
+    attachedTo: null,
+    details: [{
+        folder: 'Directional Light',
+        parent: 'mainLight',
+        specs: [{
+            name: 'intensity',
+            value: null,
+            params: [0, 20],
+            type: 'number'
+        }, {
+            name: 'mainLightColor',
+            value: mainLightCtlSpecs,
+            params: [255],
+            type: 'color'
+        }]
+    }, {
+        folder: 'Point Light',
+        parent: 'pointLight',
+        specs: [{
+            name: 'intensity',
+            value: null,
+            params: [0, 50],
+            type: 'number'
+        }, {
+            name: 'pointLightColor',
+            value: pointLightCtlSpecs,
+            params: [255],
+            type: 'color'
+        }]
+    }, {
+        folder: 'Hemisphere Light',
+        parent: 'hemisphereLight',
+        specs: [{
+            name: 'intensity',
+            value: null,
+            params: [0, 50],
+            type: 'number'
+        }, {
+            name: 'hemisphereLightSkyColor',
+            value: hemisphereLightCtlSpecs,
+            params: [255],
+            type: 'color'
+        }, {
+            name: 'hemisphereLightGroundColor',
+            value: hemisphereLightCtlSpecs,
+            params: [255],
+            type: 'color'
+        }]
+    }]
+};
 
 class WorldScene1 extends WorldScene  {
     #loaded = false;
-    #guiLoaded = false;
     #lights = { mainLight: null, pointLight: null, ambientLight: null, hemisphereLight: null };
 
     // 1. Create an instance of the World app   
@@ -63,6 +115,11 @@ class WorldScene1 extends WorldScene  {
         this.loop.updatables = [this.controls.defControl];
         this.scene.add(this.#lights.mainLight, this.#lights.hemisphereLight, this.camera);
 
+        guiSpecs.parents.push({name: 'mainLight', value: this.#lights.mainLight});
+        guiSpecs.parents.push({name: 'pointLight', value: this.#lights.pointLight});
+        guiSpecs.parents.push({name: 'hemisphereLight', value: this.#lights.hemisphereLight});
+        guiSpecs.attachedTo = this;
+        this.guiSpecs = guiSpecs;
         return {
             renderer: this.renderer,
             init: this.init.bind(this), 
@@ -150,40 +207,6 @@ class WorldScene1 extends WorldScene  {
         this.scene.add(sphere, cube, box.mesh, earth.mesh, meshGroup);
         this.initContainer();
         this.#loaded = true;
-    }
-
-    initGUIControl() {
-        if (this.#guiLoaded) return;
-        this.#guiLoaded = true;
-        const folder1 = this.gui.addFolder('Directional Light');
-        folder1.addColor(mainLightCtlSpecs, 'mainLightColor', 255);
-        folder1.add(this.#lights.mainLight, 'intensity', 0, 20);
-        const folder2 = this.gui.addFolder('Point Light');
-        folder2.addColor(pointLightCtlSpecs, 'pointLightColor', 255);
-        folder2.add(this.#lights.pointLight, 'intensity', 0, 50);
-        const folder3 = this.gui.addFolder('Hemisphere Light');
-        folder3.addColor(hemisphereLightCtlSpecs, 'hemisphereLightSkyColor', 255);
-        folder3.addColor(hemisphereLightCtlSpecs, 'hemisphereLightGroundColor', 255);
-        folder3.add(this.#lights.hemisphereLight, 'intensity', 0, 50);
-        this.gui.onChange((event) => {
-            const val = event.value;
-            const color = `rgb(${val[0]},${val[1]},${val[2]})`;
-            switch (event.property) {
-                case 'mainLightColor':
-                    this.#lights.mainLight.color.setStyle(color);
-                    break;
-                case 'pointLightColor':
-                    this.#lights.pointLight.color.setStyle(color);
-                    break;
-                case 'hemisphereLightSkyColor':
-                    this.#lights.hemisphereLight.color.setStyle(color);
-                    break;
-                case 'hemisphereLightGroundColor':
-                    this.#lights.hemisphereLight.groundColor.setStyle(color);
-                    break;
-            }
-            if (this.staticRendering) this.render();
-        });
     }
 }
 
