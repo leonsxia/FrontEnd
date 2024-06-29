@@ -1,4 +1,4 @@
-import { Train } from '../components/Train/Train.js';
+import { Train } from '../components/train/Train.js';
 import { createAxesHelper, createGridHelper } from '../components/helpers.js';
 import { createLights } from '../components/lights.js';
 import { WorldScene } from './WorldScene.js';
@@ -18,7 +18,7 @@ const mainLightCtlSpecs = {
     mainLightColor: [255, 255, 255]
 };
 const pointLightCtlSpecs = {
-    pointLightColor: [255, 255, 255]
+    pointLightColor: [255, 255, 0]
 };
 const hemisphereLightCtlSpecs = {
     hemisphereLightGroundColor: [47, 79, 79],
@@ -72,7 +72,7 @@ const guiRightSpecs = {
             name: 'hemisphereLightGroundColor',
             value: hemisphereLightCtlSpecs,
             params: [255],
-            type: 'color'
+            type: 'groundColor'
         }]
     }]
 };

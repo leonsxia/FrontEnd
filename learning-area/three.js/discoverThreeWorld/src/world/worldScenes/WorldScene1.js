@@ -75,7 +75,7 @@ const guiRightSpecs = {
             name: 'hemisphereLightGroundColor',
             value: hemisphereLightCtlSpecs,
             params: [255],
-            type: 'color'
+            type: 'groundColor'
         }]
     }]
 };

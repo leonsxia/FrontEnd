@@ -18,7 +18,7 @@ const mainLightCtlSpecs = {
     mainLightColor: [255, 255, 255]
 };
 const pointLightCtlSpecs = {
-    pointLightColor: [255, 255, 255]
+    pointLightColor: [204, 204, 204] // #cccccc
 };
 const hemisphereLightCtlSpecs = {
     hemisphereLightGroundColor: [47, 79, 79],
@@ -72,7 +72,7 @@ const guiRightSpecs = {
             name: 'hemisphereLightGroundColor',
             value: hemisphereLightCtlSpecs,
             params: [255],
-            type: 'color'
+            type: 'groundColor'
         }]
     }]
 };

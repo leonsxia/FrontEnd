@@ -97,6 +97,7 @@ class Gui {
                         folder.add(parent, property, spec.params);
                         break;
                     case 'color':
+                    case 'groundColor':
                         folder.addColor(parent, property, ...spec.params);
                         break;
                     case 'function':
@@ -115,14 +116,16 @@ class Gui {
 
     bindChange(gui, eventObjs) {
         gui.onChange(event => {
-            const find = eventObjs.find(o => o.value.hasOwnProperty(event.property));
+            const find = eventObjs.find(o => o.name === event.property);
             if (find) {
                 const val = event.value;
                 const target = this.#objects.find(o => o.name === find.parent).value;
                 switch(find.type) {
                     case 'color':
-                        const color = `rgb(${val[0]},${val[1]},${val[2]})`;
-                        target.color.setStyle(color);
+                        target.color.setStyle(`rgb(${val[0]},${val[1]},${val[2]})`);
+                        break;
+                    case 'groundColor':
+                        target.groundColor.setStyle(`rgb(${val[0]},${val[1]},${val[2]})`);
                         break;
                     case 'scene-dropdown':
                         if (this.#sceneChanged) return;
