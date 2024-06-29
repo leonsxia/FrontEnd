@@ -19,14 +19,16 @@ class WorldScene {
     gui = null;
     guiRightSpecs = {};
     guiLeftSpecs = {};
+    eventDispatcher;
 
-    constructor(container, renderer, specs) {
+    constructor(container, renderer, specs, eventDispatcher) {
         this.name = specs.name;
         this.renderer = renderer;
         this.camera = createCamera(specs.camera);
         this.scene = createScene(specs.scene.backgroundColor);
         this.loop = new Loop(this.camera, this.scene, this.renderer);
         this.container = container;
+        this.eventDispatcher = eventDispatcher;
 
         this.controls = new WorldControls(this.camera, this.renderer.domElement);
 

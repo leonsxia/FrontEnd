@@ -83,9 +83,9 @@ class WorldScene3 extends WorldScene {
     #loaded = false;
     #lights = { mainLight: null, pointLight: null, ambientLight: null, hemisphereLight: null };
 
-    constructor(container, renderer, globalConfig) {
+    constructor(container, renderer, globalConfig, eventDispatcher) {
         Object.assign(worldSceneSpecs, globalConfig)
-        super(container, renderer, worldSceneSpecs);
+        super(container, renderer, worldSceneSpecs, eventDispatcher);
 
         const directLightSpecs = {
             color: '#ffffff',

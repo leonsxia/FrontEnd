@@ -3,7 +3,7 @@ import { createAxesHelper, createGridHelper } from '../components/helpers.js';
 import { createLights } from '../components/lights.js';
 import { WorldScene } from './WorldScene.js';
 
-const sceneName = 'scene2';
+const sceneName = 'RunningTrain';
 const worldSceneSpecs = {
     name: sceneName,
     camera: {
@@ -12,7 +12,8 @@ const worldSceneSpecs = {
     scene: {
         backgroundColor: 'lightblue'
     },
-    enableGui: true
+    enableGui: true,
+    moveType: 'tankmove'
 };
 const mainLightCtlSpecs = {
     mainLightColor: [255, 255, 255]
@@ -81,9 +82,9 @@ class WorldScene2 extends WorldScene {
     #loaded = false;
     #lights = { mainLight: null, pointLight: null, ambientLight: null, hemisphereLight: null };
 
-    constructor(container, renderer, globalConfig) {
+    constructor(container, renderer, globalConfig, eventDispatcher) {
         Object.assign(worldSceneSpecs, globalConfig)
-        super(container, renderer, worldSceneSpecs);
+        super(container, renderer, worldSceneSpecs, eventDispatcher);
 
         const directLightSpecs = {
             color: 'white',
@@ -113,11 +114,11 @@ class WorldScene2 extends WorldScene {
 
         const axesSpecs = {
             size: 3,
-            position: [-5.5, 0, -5.5]
+            position: [-25.5, 0, -25.5]
         };
         const gridSpecs = {
-            size: 10,
-            divisions: 10
+            size: 50,
+            divisions: 50
         }
         this.loop.updatables = [this.controls.defControl];
         this.scene.add(this.#lights.mainLight, this.#lights.hemisphereLight, this.camera, createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
@@ -166,11 +167,26 @@ class WorldScene2 extends WorldScene {
             this.initContainer();
             return;
         }
-        const train = new Train();
+        const train = new Train('red train');
+        this.subscribeEvents(train);
         this.loop.updatables.push(train);
-        this.scene.add(train);
+        this.scene.add(train.group);
         this.initContainer();
         this.#loaded = true;
+    }
+
+    subscribeEvents(obj) {
+        this.eventDispatcher.actions.forEach(action => {
+            const callback = obj[action];
+            if (callback) {
+                const subscriber = {
+                    subscriber: obj,
+                    scene: this.name,
+                    callback: callback
+                }
+                this.eventDispatcher.subscribe(worldSceneSpecs.moveType, action, subscriber);
+            }
+        });
     }
 }
 
