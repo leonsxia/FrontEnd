@@ -1,8 +1,7 @@
-import { Group, MathUtils, Vector3 } from 'three';
+import { Group } from 'three';
 import { createMeshes } from './meshes';
 import { Moveable2D } from '../Moveable2D';
 
-const wheelSpeed = MathUtils.degToRad(24);
 class Train extends Moveable2D {
     constructor(name = '') {
         super();
@@ -22,50 +21,20 @@ class Train extends Moveable2D {
     }
 
     tick(delta) {
-        const R = 3;
+        const radius = 3;
+        const R = this.isAccelerating ? radius * 2.5 : radius;
         const Rl = 0.8;
         const Rs = 0.4;
-        const vel = 5.55; // m/s
+        const vel = this.isAccelerating ? 13.89 : 5.55; // 50km/h - 20km/s
         const rotateVel = vel / R;
         const smallWheelRotateVel = vel / Rs;
         const largeWheelRotateVel = vel / Rl;
         const dist = vel * delta;
-        let deltaVec3, deltaX, deltaZ; 
-        if (this.isMovingForward) {
-            deltaVec3 = new Vector3(0, 0, dist);
-            this.group.position.copy(this.group.localToWorld(deltaVec3));
-        } else if (this.isMovingBackward) {
-            const deltaVec3 = new Vector3(0, 0, -dist);
-            this.group.position.copy(this.group.localToWorld(deltaVec3));
-        } else if (this.isMovingForwardLeft) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(deltaX, 0, deltaZ);
-            this.group.position.copy(this.group.localToWorld(deltaVec3));
-            this.group.rotation.y += rotateVel * delta;
-        } else if (this.isMovingForwardRight) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(-deltaX, 0, deltaZ);
-            this.group.position.copy(this.group.localToWorld(deltaVec3));
-            this.group.rotation.y -= rotateVel * delta;
-        } else if (this.isMovingBackwardLeft) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(deltaX, 0, -deltaZ);
-            this.group.position.copy(this.group.localToWorld(deltaVec3));
-            this.group.rotation.y -= rotateVel * delta;
-        } else if (this.isMovingBackwardRight) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(-deltaX, 0, -deltaZ);
-            this.group.position.copy(this.group.localToWorld(deltaVec3));
-            this.group.rotation.y += rotateVel * delta;
-        } else if (this.isTurnClockwise) {
-            this.group.rotation.y -= rotateVel * delta;
-        } else if (this.isTurnCounterClockwise) {
-            this.group.rotation.y += rotateVel * delta;
-        }
+        const params = {
+            group: this.group, R, rotateVel, dist, delta
+        };
+        this.tankmoveTick(params);
+
         if (this.isForward) {
             this.meshes.bigWheel.rotation.x += delta * largeWheelRotateVel;
             this.meshes.smallWheelFront.rotation.x += delta * smallWheelRotateVel;

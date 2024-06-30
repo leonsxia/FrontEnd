@@ -8,7 +8,7 @@ const config = {
     scenes: ['scene1', 'RunningTrain', 'scene3']  // scene list for scene selector
 };
 const movementTypes = ['tankmove'];
-const moveActions = ['movingLeft', 'movingRight', 'movingForward', 'movingBackward'];
+const moveActions = ['movingLeft', 'movingRight', 'movingForward', 'movingBackward', 'accelerate'];
 
 class World {
     #renderer;
@@ -20,10 +20,12 @@ class World {
     #keyDDown = false;
     #keyWDown = false;
     #keySDown = false;
+    #keyShiftDown = false;
     #movingLeft = false;
     #movingRight = false;
     #movingForward = false;
     #movingBackward = false;
+    #accelerate = false;
 
     constructor(container, infos) {
         this.#renderer = createRenderer();
@@ -147,6 +149,12 @@ class World {
                     }
                     break;
                 case 'Shift':
+                    if (!this.#keyShiftDown) {
+                        this.#keyShiftDown = true;
+                        this.#accelerate = true;
+                        console.log('faster!');
+                        eventDispatcher.publish(messageType, moveActions[4], this.current, this.#accelerate);
+                    }
                     break;
                 case ' ':
                     break;
@@ -216,6 +224,10 @@ class World {
                     this.logMovement();
                     break;
                 case 'Shift':
+                    this.#keyShiftDown = false;
+                    this.#accelerate = false;
+                    console.log('slow down');
+                    eventDispatcher.publish(messageType, moveActions[4], this.current, this.#accelerate);
                     break;
                 case ' ':
                     break;
