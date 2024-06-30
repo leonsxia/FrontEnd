@@ -1,11 +1,12 @@
 import { WorldScene1 } from "./worldScenes/WorldScene1";
 import { WorldScene2 } from "./worldScenes/WorldScene2";
 import { WorldScene3 } from "./worldScenes/WorldScene3";
+import { WorldScene4 } from "./worldScenes/WorldScene4";
 import { createRenderer } from "./systems/renderer";
 import { EventDispatcher } from "./systems/EventDispatcher";
 
 const config = { 
-    scenes: ['scene1', 'RunningTrain', 'scene3']  // scene list for scene selector
+    scenes: ['scene1', 'RunningTrain', 'Birds', 'Tank']  // scene list for scene selector
 };
 const movementTypes = ['tankmove'];
 const moveActions = ['movingLeft', 'movingRight', 'movingForward', 'movingBackward', 'accelerate'];
@@ -38,6 +39,7 @@ class World {
         this.worldScenes.push(new WorldScene1(container, this.#renderer, config, this.#movementEventDispatcher));
         this.worldScenes.push(new WorldScene2(container, this.#renderer, config, this.#movementEventDispatcher));
         this.worldScenes.push(new WorldScene3(container, this.#renderer, config, this.#movementEventDispatcher));
+        this.worldScenes.push(new WorldScene4(container, this.#renderer, config, this.#movementEventDispatcher));
         // this.bindAllMoves();
     }
 

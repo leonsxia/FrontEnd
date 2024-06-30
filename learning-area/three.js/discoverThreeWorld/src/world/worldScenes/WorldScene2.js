@@ -1,4 +1,4 @@
-import { Train } from '../components/train/Train.js';
+import { Train } from '../components/composite/train/Train.js';
 import { createAxesHelper, createGridHelper } from '../components/helpers.js';
 import { createLights } from '../components/lights.js';
 import { WorldScene } from './WorldScene.js';
@@ -168,25 +168,11 @@ class WorldScene2 extends WorldScene {
             return;
         }
         const train = new Train('red train');
-        this.subscribeEvents(train);
+        this.subscribeEvents(train, worldSceneSpecs.moveType);
         this.loop.updatables.push(train);
         this.scene.add(train.group);
         this.initContainer();
         this.#loaded = true;
-    }
-
-    subscribeEvents(obj) {
-        this.eventDispatcher.actions.forEach(action => {
-            const callback = obj[action];
-            if (callback) {
-                const subscriber = {
-                    subscriber: obj,
-                    scene: this.name,
-                    callback: callback
-                }
-                this.eventDispatcher.subscribe(worldSceneSpecs.moveType, action, subscriber);
-            }
-        });
     }
 }
 

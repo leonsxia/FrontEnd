@@ -132,6 +132,20 @@ class WorldScene {
         // this.#renderer.dispose();
         // this.#renderer.forceContextLoss();
     }
+
+    subscribeEvents(obj, moveType) {
+        this.eventDispatcher.actions.forEach(action => {
+            const callback = obj[action];
+            if (callback) {
+                const subscriber = {
+                    subscriber: obj,
+                    scene: this.name,
+                    callback: callback
+                }
+                this.eventDispatcher.subscribe(moveType, action, subscriber);
+            }
+        });
+    }
 }
 
 export { WorldScene };

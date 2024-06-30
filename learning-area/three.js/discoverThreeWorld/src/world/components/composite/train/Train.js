@@ -1,6 +1,6 @@
 import { Group } from 'three';
 import { createMeshes } from './meshes';
-import { Moveable2D } from '../Moveable2D';
+import { Moveable2D } from '../../movement/Moveable2D';
 
 class Train extends Moveable2D {
     constructor(name = '') {

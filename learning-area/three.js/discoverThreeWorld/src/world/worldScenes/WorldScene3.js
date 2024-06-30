@@ -1,9 +1,9 @@
 import { createAxesHelper, createGridHelper } from '../components/helpers.js';
 import { createLights } from '../components/lights.js';
-import { BirdsGroup } from '../components/birds/Birds.js'
+import { BirdsGroup } from '../components/composite/birds/Birds.js'
 import { WorldScene } from './WorldScene.js';
 
-const sceneName = 'scene3';
+const sceneName = 'Birds';
 const worldSceneSpecs = {
     name: sceneName,
     camera: {
