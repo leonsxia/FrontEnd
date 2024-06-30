@@ -22,7 +22,7 @@ class Train extends Moveable2D {
     }
 
     tick(delta) {
-        const R = 3.5;
+        const R = 3;
         const Rl = 0.8;
         const Rs = 0.4;
         const vel = 5.55; // m/s
@@ -35,32 +35,32 @@ class Train extends Moveable2D {
             deltaVec3 = new Vector3(0, 0, dist);
             this.group.position.copy(this.group.localToWorld(deltaVec3));
         } else if (this.isMovingBackward) {
-            const deltaVec3 = new Vector3(0, 0, -vel * delta);
+            const deltaVec3 = new Vector3(0, 0, -dist);
             this.group.position.copy(this.group.localToWorld(deltaVec3));
         } else if (this.isMovingForwardLeft) {
             deltaX = R - R * Math.cos(dist / R);
             deltaZ = R * Math.sin(dist / R);
             deltaVec3 = new Vector3(deltaX, 0, deltaZ);
-            this.group.rotation.y += rotateVel * delta;
             this.group.position.copy(this.group.localToWorld(deltaVec3));
+            this.group.rotation.y += rotateVel * delta;
         } else if (this.isMovingForwardRight) {
             deltaX = R - R * Math.cos(dist / R);
             deltaZ = R * Math.sin(dist / R);
             deltaVec3 = new Vector3(-deltaX, 0, deltaZ);
-            this.group.rotation.y -= rotateVel * delta;
             this.group.position.copy(this.group.localToWorld(deltaVec3));
+            this.group.rotation.y -= rotateVel * delta;
         } else if (this.isMovingBackwardLeft) {
             deltaX = R - R * Math.cos(dist / R);
             deltaZ = R * Math.sin(dist / R);
             deltaVec3 = new Vector3(deltaX, 0, -deltaZ);
-            this.group.rotation.y -= rotateVel * delta;
             this.group.position.copy(this.group.localToWorld(deltaVec3));
+            this.group.rotation.y -= rotateVel * delta;
         } else if (this.isMovingBackwardRight) {
             deltaX = R - R * Math.cos(dist / R);
             deltaZ = R * Math.sin(dist / R);
             deltaVec3 = new Vector3(-deltaX, 0, -deltaZ);
-            this.group.rotation.y += rotateVel * delta;
             this.group.position.copy(this.group.localToWorld(deltaVec3));
+            this.group.rotation.y += rotateVel * delta;
         } else if (this.isTurnClockwise) {
             this.group.rotation.y -= rotateVel * delta;
         } else if (this.isTurnCounterClockwise) {
