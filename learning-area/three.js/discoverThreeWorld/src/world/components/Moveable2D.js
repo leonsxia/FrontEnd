@@ -88,34 +88,30 @@ class Moveable2D {
         } else if (this.isMovingBackward) {
             const deltaVec3 = new Vector3(0, 0, -dist);
             group.position.copy(group.localToWorld(deltaVec3));
-        } else if (this.isMovingForwardLeft) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(deltaX, 0, deltaZ);
-            group.position.copy(group.localToWorld(deltaVec3));
-            group.rotation.y += rotateVel * delta;
-        } else if (this.isMovingForwardRight) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(-deltaX, 0, deltaZ);
-            group.position.copy(group.localToWorld(deltaVec3));
-            group.rotation.y -= rotateVel * delta;
-        } else if (this.isMovingBackwardLeft) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(deltaX, 0, -deltaZ);
-            group.position.copy(group.localToWorld(deltaVec3));
-            group.rotation.y -= rotateVel * delta;
-        } else if (this.isMovingBackwardRight) {
-            deltaX = R - R * Math.cos(dist / R);
-            deltaZ = R * Math.sin(dist / R);
-            deltaVec3 = new Vector3(-deltaX, 0, -deltaZ);
-            group.position.copy(group.localToWorld(deltaVec3));
-            group.rotation.y += rotateVel * delta;
         } else if (this.isTurnClockwise) {
             group.rotation.y -= rotateVel * delta;
         } else if (this.isTurnCounterClockwise) {
             group.rotation.y += rotateVel * delta;
+        } else {
+            deltaX = R - R * Math.cos(dist / R);
+            deltaZ = R * Math.sin(dist / R);
+            if (this.isMovingForwardLeft) {
+                deltaVec3 = new Vector3(deltaX, 0, deltaZ);
+                group.position.copy(group.localToWorld(deltaVec3));
+                group.rotation.y += rotateVel * delta;
+            } else if (this.isMovingForwardRight) {
+                deltaVec3 = new Vector3(-deltaX, 0, deltaZ);
+                group.position.copy(group.localToWorld(deltaVec3));
+                group.rotation.y -= rotateVel * delta;
+            } else if (this.isMovingBackwardLeft) {
+                deltaVec3 = new Vector3(deltaX, 0, -deltaZ);
+                group.position.copy(group.localToWorld(deltaVec3));
+                group.rotation.y -= rotateVel * delta;
+            } else if (this.isMovingBackwardRight) {
+                deltaVec3 = new Vector3(-deltaX, 0, -deltaZ);
+                group.position.copy(group.localToWorld(deltaVec3));
+                group.rotation.y += rotateVel * delta;
+            }
         }
     }
 }
