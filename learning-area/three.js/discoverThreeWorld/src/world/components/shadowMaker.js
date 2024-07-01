@@ -2,29 +2,51 @@ import { createCameraHelper, createDirectialLightHelper } from './utils/helpers.
 
 function setupShadowLight(scene, ...lights) {
     const shadowLightObjects = [];
-    lights.forEach(l => {
-        const { light, name } = l;
+    lights.filter(l => l.visible).forEach(l => {
+        const { light, name, debug, shadow } = l;
         switch (light.constructor.name) {
             case 'DirectionalLight':
-                shadowLightObjects.push({
-                    light: light,
-                    lightHelper: createDirectialLightHelper(light),
-                    lightShadowCamHelper: createCameraHelper(light.shadow.camera),
-                    name: name
-                });
+                if (debug) {
+                    const shadowLightObject = {
+                        light: light,
+                        lightHelper: createDirectialLightHelper(light),
+                        name: name,
+                        debug, shadow
+                    };
+                    if (shadow) {
+                        Object.assign(shadowLightObject, {
+                            lightShadowCamHelper: createCameraHelper(light.shadow.camera)
+                        });
+                    }
+                    shadowLightObjects.push(shadowLightObject);
+                } else {
+                    shadowLightObjects.push({
+                        light: light,
+                        name: name,
+                        debug, shadow
+                    });
+                }
                 break;
         }
     });
 
     shadowLightObjects.forEach(lightObj => {
-        const { light, lightHelper, lightShadowCamHelper } = lightObj;
-        scene.add(light, lightHelper, lightShadowCamHelper);
-        attachShadowCamProps(light);
-        attachLightHelper(light, lightHelper, lightShadowCamHelper);
-        addShadow(light);
+        const { light } = lightObj;
+        scene.add(light);
+        if (lightObj.debug) {
+            const { lightHelper, lightShadowCamHelper } = lightObj;
+            scene.add(lightHelper);
+            if (lightObj.shadow) {
+                scene.add(lightShadowCamHelper);
+                attachShadowCamProps(light);
+                addShadow(light);
+            }
+            attachLightHelper(light, lightHelper, lightShadowCamHelper);
+        }
     });
 
-    // fix when change light position or target, the shadow camera won't update at first frame.
+    // fix when change light position or target, 
+    // the shadow camera won't update at first static frame.
     updateLightCamera.call(this, shadowLightObjects);
     return shadowLightObjects;
 }
@@ -78,7 +100,8 @@ function attachShadowCamProps(light) {
 
 function attachLightHelper(light, lightHelper, lightShadowCamHelper) {
     light['lightHelper'] = lightHelper;
-    light['lightShadowCamHelper'] = lightShadowCamHelper;
+    if (lightShadowCamHelper) 
+        light['lightShadowCamHelper'] = lightShadowCamHelper;
 }
 
 function updateSingleLightCamera(lightObj, needRender = false) {
@@ -88,11 +111,11 @@ function updateSingleLightCamera(lightObj, needRender = false) {
                 const { light, lightHelper, lightShadowCamHelper } = lightObj;
                 // update the light target's matrixWorld because it's needed by the helper
                 light.target.updateMatrixWorld();
-                lightHelper.update();
+                if (lightObj.debug) lightHelper.update();
                 // update the light's shadow camera's projection matrix
                 light.shadow.camera.updateProjectionMatrix();
                 // and now update the camera helper we're using to show the light's shadow camera
-                lightShadowCamHelper.update();
+                if (lightObj.debug && lightObj.shadow) lightShadowCamHelper.update();
             }
             break;
     }

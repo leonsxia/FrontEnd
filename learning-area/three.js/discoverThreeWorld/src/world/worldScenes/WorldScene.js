@@ -4,6 +4,8 @@ import { WorldControls } from '../systems/Controls.js';
 import { Resizer } from '../systems/Resizer.js';
 import { Loop } from '../systems/Loop.js';
 import { Gui } from '../systems/Gui.js';
+import { updateSingleLightCamera } from '../components/shadowMaker.js';
+import { makeGuiPanel, makeDropdownGuiConfig } from '../components/utils/guiConfigHelper.js';
 
 class WorldScene {
     name = 'default scene';
@@ -49,20 +51,11 @@ class WorldScene {
         if (specs.enableGui) {
             this.gui = new Gui();
             this.controls.initPanels(this.gui);
-            this.guiLeftSpecs = {
-                parents: {},
-                details: [{
-                    folder: 'Select World',
-                    parent: 'selectWorld',
-                    specs: [{
-                        name: 'scene',
-                        value: { scene: specs.name },
-                        params: specs.scenes,
-                        type: 'scene-dropdown',
-                        changeFn: specs.changeCallback
-                    }]
-                }]
-            };
+            this.guiLeftSpecs = makeGuiPanel();
+            this.guiLeftSpecs.details.push(makeDropdownGuiConfig(
+                'Select World', 'selectWorld', 'scene', { scene: specs.name },
+                specs.scenes, specs.changeCallback
+            ));
         }
     }
 
@@ -147,6 +140,17 @@ class WorldScene {
                 }
                 this.eventDispatcher.subscribe(moveType, action, subscriber);
             }
+        });
+    }
+
+    bindLightShadowHelperGuiCallback() {
+        // bind callback to light helper and shadow cam helper
+        this.shadowLightObjects.forEach(lightObj => {
+            const { specs } = this.guiRightSpecs.details.find(d => d.parent === lightObj.name);
+            const changeObjs = specs.filter(s => s.hasOwnProperty('changeFn') && (s.type === 'light-num' || s.type === 'color' || s.type === 'groundColor'));
+            changeObjs.forEach(o => {
+                o['changeFn'] = updateSingleLightCamera.bind(this, lightObj, true);
+            })
         });
     }
 }

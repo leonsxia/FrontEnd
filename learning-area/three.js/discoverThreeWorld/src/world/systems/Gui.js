@@ -131,9 +131,11 @@ class Gui {
                 switch(find.type) {
                     case 'color':
                         target.color.setStyle(this.colorStr(...val));
+                        if (find.changeFn) find.changeFn();
                         break;
                     case 'groundColor':
                         target.groundColor.setStyle(this.colorStr(...val));
+                        if (find.changeFn) find.changeFn();
                         break;
                     case 'scene-dropdown':
                         if (this.#sceneChanged) return;

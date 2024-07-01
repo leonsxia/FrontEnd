@@ -4,33 +4,20 @@ function colorStr(r, g, b) {
     return `rgb(${r},${g},${b})`;
 }
 
-function createLights(directLightSpecs, pointLightSpecs, ambientLightSpecs, hemisphereLightSpecs) {
-    const mainLight = new DirectionalLight(new Color(colorStr(...directLightSpecs.color)), directLightSpecs.intensity);
-    const pointLight = new PointLight(new Color(colorStr(...pointLightSpecs.color)), pointLightSpecs.intensity, pointLightSpecs.distance, pointLightSpecs.decay);
-    const ambientLight = new AmbientLight(new Color(colorStr(...ambientLightSpecs.color)), ambientLightSpecs.intensity);
-    const hemisphereLight = new HemisphereLight(new Color(colorStr(...hemisphereLightSpecs.skyColor)), new Color(colorStr(...hemisphereLightSpecs.groundColor)), hemisphereLightSpecs.intensity);
-
-    // move the light right, up and towards us
-    mainLight.position.set(...directLightSpecs.position);
-    pointLight.position.set(...pointLightSpecs.position);
-    hemisphereLight.position.set(...hemisphereLightSpecs.position);
-
-    return { mainLight, pointLight, ambientLight, hemisphereLight };
-}
-
 function createBasicLights(directLightSpecs, ambientLightSpecs, hemisphereLightSpecs) {
-    const mainLight = new DirectionalLight(new Color(colorStr(...directLightSpecs.color)), directLightSpecs.intensity);
-    const ambientLight = new AmbientLight(new Color(colorStr(...ambientLightSpecs.color)), ambientLightSpecs.intensity);
-    const hemisphereLight = new HemisphereLight(new Color(colorStr(...hemisphereLightSpecs.skyColor)), new Color(colorStr(...hemisphereLightSpecs.groundColor)), hemisphereLightSpecs.intensity);
+    const lights = {};
+    lights[directLightSpecs.name] = new DirectionalLight(new Color(colorStr(...directLightSpecs.detail.color)), directLightSpecs.detail.intensity);
+    lights[ambientLightSpecs.name] = new AmbientLight(new Color(colorStr(...ambientLightSpecs.detail.color)), ambientLightSpecs.detail.intensity);
+    lights[hemisphereLightSpecs.name] = new HemisphereLight(new Color(colorStr(...hemisphereLightSpecs.detail.skyColor)), new Color(colorStr(...hemisphereLightSpecs.detail.groundColor)), hemisphereLightSpecs.detail.intensity);
 
-    mainLight.position.set(...directLightSpecs.position);
-    hemisphereLight.position.set(...hemisphereLightSpecs.position);
+    lights[directLightSpecs.name].position.set(...directLightSpecs.detail.position);
+    lights[hemisphereLightSpecs.name].position.set(...hemisphereLightSpecs.detail.position);
 
-    directLightSpecs.light = mainLight;
-    ambientLightSpecs.light = ambientLight;
-    hemisphereLightSpecs.light = hemisphereLight;
+    directLightSpecs.light = lights[directLightSpecs.name];
+    ambientLightSpecs.light = lights[ambientLightSpecs.name];
+    hemisphereLightSpecs.light = lights[hemisphereLightSpecs.name];
 
-    return { mainLight, ambientLight, hemisphereLight };
+    return lights;
 }
 
 function createPointLights(pointLightSpecsArr) {
@@ -45,4 +32,4 @@ function createPointLights(pointLightSpecsArr) {
     return pointLights;
 }
 
-export { createLights, createBasicLights };
+export { createBasicLights, createPointLights };
