@@ -231,11 +231,11 @@ class WorldScene4 extends WorldScene {
 
         const axesSpecs = {
             size: 3,
-            position: [-25.5, 0, -25.5]
+            position: [-50.5, 0, -50.5]
         };
         const gridSpecs = {
-            size: 50,
-            divisions: 50
+            size: 100,
+            divisions: 100
         }
 
         this.loop.updatables = [this.controls.defControl];
@@ -274,7 +274,7 @@ class WorldScene4 extends WorldScene {
                         const lightObj = this.shadowLightObjects.find(o => o.name === 'mainLight');
                         detail.specs.forEach(spec => {
                             if (spec.hasOwnProperty('changeFn') && spec.type === 'light-num') {
-                                spec['changeFn'] = updateSingleLightCamera.bind(this, lightObj, this.render.bind(this), true);
+                                spec['changeFn'] = updateSingleLightCamera.bind(this, lightObj, true);
                             }
                         })
                         break;
@@ -307,8 +307,8 @@ class WorldScene4 extends WorldScene {
         
         // groud
         const groudSpecs = {
-            width: 50,
-            height: 50,
+            width: 100,
+            height: 100,
             color: 0xCC8866,
             name: 'ground'
         };

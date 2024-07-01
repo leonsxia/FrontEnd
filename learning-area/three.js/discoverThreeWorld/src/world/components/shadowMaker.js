@@ -25,7 +25,7 @@ function setupShadowLight(scene, ...lights) {
     });
 
     // fix when change light position or target, the shadow camera won't update at first frame.
-    updateLightCamera(shadowLightObjects, this.render.bind(this));
+    updateLightCamera.call(this, shadowLightObjects);
     return shadowLightObjects;
 }
 
@@ -81,7 +81,7 @@ function attachLightHelper(light, lightHelper, lightShadowCamHelper) {
     light['lightShadowCamHelper'] = lightShadowCamHelper;
 }
 
-function updateSingleLightCamera(lightObj, render, needRender = false) {
+function updateSingleLightCamera(lightObj, needRender = false) {
     switch (lightObj.light.constructor.name) {
         case 'DirectionalLight':
             {
@@ -96,14 +96,14 @@ function updateSingleLightCamera(lightObj, render, needRender = false) {
             }
             break;
     }
-    if (needRender) render();
+    if (needRender) this.render();
 }
 
-function updateLightCamera(lights, render) {
+function updateLightCamera(lights) {
     lights.forEach(lightObj => {
-        updateSingleLightCamera(lightObj, render);
+        updateSingleLightCamera.call(this, lightObj);
     });
-    render();
+    this.render();
 }
 
 export { setupShadowLight, updateSingleLightCamera };
