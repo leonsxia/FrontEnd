@@ -47,6 +47,22 @@ class Train extends Moveable2D {
             this.meshes.smallWheelRear.rotation.x -= delta * smallWheelRotateVel;
         }
     }
+
+    castShadow(cast) {
+        this.group.children.forEach(child => {
+            if (child.isMesh) {
+                child.castShadow = cast;
+            }
+        });
+    }
+
+    receiveShadow(receive) {
+        this.group.children.forEach(child => {
+            if (child.isMesh) {
+                child.receiveShadow = receive;
+            }
+        });
+    }
 }
 
 export { Train };

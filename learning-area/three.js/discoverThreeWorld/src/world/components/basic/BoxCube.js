@@ -1,46 +1,21 @@
-import { BoxGeometry, Mesh, MeshStandardMaterial, TextureLoader, SRGBColorSpace, MathUtils } from 'three'
+import { Mesh, MathUtils } from 'three'
+import { BasicObject } from './BasicObject';
 
-class BoxCube {
-    #map = null;
-    #boxGeometry = null;
-    #material = null;
-    #mesh = null;
+class BoxCube extends BasicObject {
     #radiansPerSecond = MathUtils.degToRad(8.59);
 
     constructor(specs) {
-        this.#material = new MeshStandardMaterial({ color: '#050505' });
-        
-        this.#boxGeometry = new BoxGeometry(specs.size.width, specs.size.height, specs.size.depth);
-
-        this.#mesh = new Mesh(this.#boxGeometry, this.#material);
-        this.#mesh.name = specs.name;
-        // this.init(specs);
+        super('box', specs);
+        this.mesh = new Mesh(this.geometry, this.material);
+        this.mesh.name = specs.name;
     }
 
     async init (specs) {
-        const [map] = await Promise.all([new TextureLoader().loadAsync(specs.map)]);
-        this.#map = map;
-        this.#map.colorSpace = SRGBColorSpace;
-        this.#mesh.material = this.#material = new MeshStandardMaterial({ map: this.#map });
-        // this.onTextureLoad();
+        await this.initBasic(specs);
     }
-
-    setPosition(pos) {
-        this.#mesh.position.set(...pos);
-    }
-
-    setRotation(trans) {
-        this.#mesh.rotation.set(...trans);
-    }
-
-    get mesh() {
-        return this.#mesh;
-    }
-
-    onTextureLoad() {}
 
     tick(delta) {
-        this.#mesh.rotation.y += delta * this.#radiansPerSecond;
+        this.mesh.rotation.y += delta * this.#radiansPerSecond;
     }
 }
 

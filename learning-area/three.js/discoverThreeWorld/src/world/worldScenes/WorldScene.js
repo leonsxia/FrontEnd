@@ -40,16 +40,17 @@ class WorldScene {
             this.render();
         };
 
-        this.controls.defControl.addEventListener('change', () => this.render());
+        this.controls.defControl.addEventListener('change', () => {
+            // important!!! no need to render after scene start to update automatically
+            // increase the performance fps
+            if (this.staticRendering) this.render();    
+        });
 
         if (specs.enableGui) {
             this.gui = new Gui();
             this.controls.initPanels(this.gui);
             this.guiLeftSpecs = {
-                parents: [{
-                    name: 'selectWorld',
-                    value: specs.changeCallback
-                }],
+                parents: { 'selectWorld': specs.changeCallback },
                 details: [{
                     folder: 'Select World',
                     parent: 'selectWorld',
@@ -120,6 +121,7 @@ class WorldScene {
 
     reset() {
         this.stop();
+        this.renderer.shadowMap.enabled = false;
         this.controls.resetCamera();
         this.controls.defControl.enabled = false;
         if (this.gui) {

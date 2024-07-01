@@ -1,21 +1,16 @@
-import { SphereGeometry, Mesh, MeshStandardMaterial, MeshPhongMaterial, TextureLoader, SRGBColorSpace, MathUtils} from 'three';
+import { Mesh, MeshPhongMaterial, TextureLoader, SRGBColorSpace, MathUtils} from 'three';
+import { BasicObject } from './BasicObject';
 
-class Earth {
+class Earth extends BasicObject {
     #surfaceMap = null;
     #normalMap = null;
     #specularMap = null;
-    #material = null;
-    #sphereGeometry = null;
-    #mesh = null;
     #radiansPerSecond = MathUtils.degToRad(8.59);
 
     constructor(specs) {
-        this.#material = new MeshStandardMaterial({ color: '#050505' });
-        
-        this.#sphereGeometry = new SphereGeometry(2, 32, 32);
-
-        this.#mesh = new Mesh(this.#sphereGeometry, this.#material);
-        this.#mesh.name = specs.name;
+        super('sphere', specs);
+        this.mesh = new Mesh(this.geometry, this.material);
+        this.mesh.name = specs.name;
     }
 
     async init(specs) {
@@ -28,27 +23,11 @@ class Earth {
         this.#surfaceMap.colorSpace = SRGBColorSpace;
         this.#normalMap = normalMap;
         this.#specularMap = specularMap;
-        this.#mesh.material = this.#material = new MeshPhongMaterial({ map: this.#surfaceMap, normalMap: this.#normalMap, specularMap: this.#specularMap, specular: 0x111111 });
-        // this.onTextureLoad();
-        
+        this.mesh.material = this.material = new MeshPhongMaterial({ map: this.#surfaceMap, normalMap: this.#normalMap, specularMap: this.#specularMap, specular: 0x111111 });
     }
-
-    setPosition(pos) {
-        this.#mesh.position.set(...pos);
-    }
-
-    setRotation(trans) {
-        this.#mesh.rotation.set(...trans);
-    }
-
-    get mesh() {
-        return this.#mesh;
-    }
-
-    onTextureLoad() {}
 
     tick(delta) {
-        this.#mesh.rotation.y += delta * this.#radiansPerSecond;
+        this.mesh.rotation.y += delta * this.#radiansPerSecond;
     }
 }
 

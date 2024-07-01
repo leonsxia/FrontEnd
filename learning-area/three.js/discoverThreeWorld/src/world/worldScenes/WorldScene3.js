@@ -15,14 +15,26 @@ const worldSceneSpecs = {
     enableGui: true
 };
 const mainLightCtlSpecs = {
-    mainLightColor: [255, 255, 255]
+    color: [255, 255, 255],
+    intensity: 2,
+    position: [-10, 10, 10]
 };
 const pointLightCtlSpecs = {
-    pointLightColor: [204, 204, 204] // #cccccc
+    color: [204, 204, 204], // #cccccc
+    position: [0, 0, 0],
+    intensity: 50,
+    distance: 0,    // infinity far
+    decay: 1    // default 2
+};
+const ambientLightCtlSpecs = {
+    color: [128, 128, 128],
+    intensity: 2
 };
 const hemisphereLightCtlSpecs = {
-    hemisphereLightGroundColor: [47, 79, 79],
-    hemisphereLightSkyColor: [160, 160, 160]
+    groundColor: [47, 79, 79],
+    skyColor: [160, 160, 160],
+    intensity: 3,
+    position: [0, 1, 0] // light emit from top to bottom
 };
 
 const guiRightSpecs = {
@@ -36,7 +48,7 @@ const guiRightSpecs = {
             params: [0, 20],
             type: 'number'
         }, {
-            name: 'mainLightColor',
+            name: 'color',
             value: mainLightCtlSpecs,
             params: [255],
             type: 'color'
@@ -50,7 +62,7 @@ const guiRightSpecs = {
             params: [0, 50],
             type: 'number'
         }, {
-            name: 'pointLightColor',
+            name: 'color',
             value: pointLightCtlSpecs,
             params: [255],
             type: 'color'
@@ -64,12 +76,12 @@ const guiRightSpecs = {
             params: [0, 50],
             type: 'number'
         }, {
-            name: 'hemisphereLightSkyColor',
+            name: 'skyColor',
             value: hemisphereLightCtlSpecs,
             params: [255],
             type: 'color'
         }, {
-            name: 'hemisphereLightGroundColor',
+            name: 'groundColor',
             value: hemisphereLightCtlSpecs,
             params: [255],
             type: 'groundColor'
@@ -87,29 +99,7 @@ class WorldScene3 extends WorldScene {
         Object.assign(worldSceneSpecs, globalConfig)
         super(container, renderer, worldSceneSpecs, eventDispatcher);
 
-        const directLightSpecs = {
-            color: '#ffffff',
-            intensity: 2,
-            position: [-10, 10, 10]
-        };
-        const pointLightSpecs = {
-            color: 0xcccccc,
-            position: [0, 0, 0],
-            intensity: 50,
-            distance: 0,    // infinity far
-            decay: 1    // default 2
-        };
-        const ambientLightSpecs = {
-            color: 0x808080,
-            intensity: 2
-        };
-        const hemisphereLightSpecs = {
-            skyColor: 0xa0a0a0,
-            groundColor: 'darkslategrey',
-            intensity: 3,
-            position: [0, 1, 0] // light emit from top to bottom
-        };
-        this.#lights = createLights(directLightSpecs, pointLightSpecs, ambientLightSpecs, hemisphereLightSpecs);
+        this.#lights = createLights(mainLightCtlSpecs, pointLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs);
 
         this.camera.add(this.#lights.pointLight);
 
@@ -125,13 +115,10 @@ class WorldScene3 extends WorldScene {
         this.scene.add(this.#lights.mainLight, this.#lights.hemisphereLight, this.camera, createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
 
         if (worldSceneSpecs.enableGui) {
-            guiRightSpecs.parents.push({ name: 'mainLight', value: this.#lights.mainLight });
-            guiRightSpecs.parents.push({ name: 'pointLight', value: this.#lights.pointLight });
-            guiRightSpecs.parents.push({ name: 'hemisphereLight', value: this.#lights.hemisphereLight });
+            guiRightSpecs.parents = this.#lights;
             this.guiRightSpecs = guiRightSpecs;
-            this.guiLeftSpecs.parents.push({
-                name: 'actions',
-                value: {
+            Object.assign(this.guiLeftSpecs.parents, {
+                'actions': {
                     start: this.start.bind(this),
                     stop: this.stop.bind(this),
                     moveCamera: this.moveCamera.bind(this),

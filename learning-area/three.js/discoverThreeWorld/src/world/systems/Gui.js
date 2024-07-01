@@ -4,7 +4,7 @@ import Stats from 'stats.js';
 class Gui {
     #guis = [];
     #stats = null;
-    #objects = [];
+    #objects = {};
     #attachedTo;
     #guiLoaded = false;
     #saveObj = null;
@@ -30,7 +30,7 @@ class Gui {
         document.body.appendChild(this.#stats.dom);
         if (this.#guiLoaded) return;
         this.#guiLoaded = true;
-        this.#objects = specs.left.parents.concat(specs.right.parents);
+        Object.assign(Object.assign(this.#objects, specs.left.parents), specs.right.parents);
         this.#attachedTo = specs.attachedTo;
         this.initLeft(specs.left);
         this.initRight(specs.right);
@@ -80,25 +80,33 @@ class Gui {
             const folder = gui.addFolder(detail.folder);
             const target = detail.parent;
             detail.specs.forEach(spec => {
-                if (spec.value) {
+                if (spec.value || spec.changeFn) {
                     Object.defineProperty(spec, 'parent', {
                         value: target,
                         writable: false
                     });
                     eventObjs.push(spec);
                 };
-                const parent = !spec.value ? this.#objects.find(o => o.name === target).value : spec.value;
+                const parent = !spec.value ?
+                    spec.sub ? 
+                    spec.subprop ? this.#objects[target][spec.sub][spec.subprop] : this.#objects[target][spec.sub] : this.#objects[target] :
+                    spec.value;
                 const property = spec.name;
+                const displayName = spec.prop ?? spec.name;
                 switch(spec.type) {
+                    case 'boolean':
+                        folder.add(parent, property).name(displayName).identifier = target;
+                        break;
                     case 'number':
-                        folder.add(parent, property, ...spec.params);
+                    case 'light-num':
+                        folder.add(parent, property, ...spec.params).name(displayName).identifier = target;
                         break;
                     case 'scene-dropdown':
-                        folder.add(parent, property, spec.params);
+                        folder.add(parent, property, spec.params).name(displayName).identifier = target;
                         break;
                     case 'color':
                     case 'groundColor':
-                        folder.addColor(parent, property, ...spec.params);
+                        folder.addColor(parent, property, ...spec.params).name(displayName).identifier = target;
                         break;
                     case 'function':
                         this.bindFunctions(folder, parent);
@@ -116,21 +124,25 @@ class Gui {
 
     bindChange(gui, eventObjs) {
         gui.onChange(event => {
-            const find = eventObjs.find(o => o.name === event.property);
+            const find = eventObjs.find(o => (o.name === event.property || o.prop === event.controller._name) && o.parent === event.controller.identifier);
             if (find) {
                 const val = event.value;
-                const target = this.#objects.find(o => o.name === find.parent).value;
+                const target = this.#objects[find.parent];
                 switch(find.type) {
                     case 'color':
-                        target.color.setStyle(`rgb(${val[0]},${val[1]},${val[2]})`);
+                        target.color.setStyle(this.colorStr(...val));
                         break;
                     case 'groundColor':
-                        target.groundColor.setStyle(`rgb(${val[0]},${val[1]},${val[2]})`);
+                        target.groundColor.setStyle(this.colorStr(...val));
                         break;
                     case 'scene-dropdown':
                         if (this.#sceneChanged) return;
                         this.#sceneChanged = true;
                         target(val);
+                        break;
+                    case 'light-num':
+                        find.changeFn();
+                        break;
                 }
             }
             if (this.#attachedTo.staticRendering) this.#attachedTo.render();
@@ -149,6 +161,10 @@ class Gui {
         this.#guis.forEach(gui => gui.reset());
         this.#sceneChanged = false;
         document.body.removeChild(this.#stats.dom);
+    }
+
+    colorStr(r, g, b) {
+        return `rgb(${r},${g},${b})`;
     }
 }
 

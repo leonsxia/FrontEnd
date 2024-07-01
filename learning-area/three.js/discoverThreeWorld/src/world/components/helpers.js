@@ -1,4 +1,4 @@
-import { AxesHelper, GridHelper } from 'three';
+import { AxesHelper, GridHelper, CameraHelper, DirectionalLightHelper } from 'three';
 
 function createAxesHelper(spcs) {
     const helper = new AxesHelper(spcs.size);
@@ -13,4 +13,19 @@ function createGridHelper(spcs) {
     return helper;
 }
 
-export { createAxesHelper, createGridHelper };
+function createCameraHelper(cam) {
+    const helper = new CameraHelper(cam);
+    return helper;
+}
+
+function createDirectialLightHelper(light) {
+    const helper = new DirectionalLightHelper(light);
+    return helper;
+}
+
+export {
+    createAxesHelper, 
+    createGridHelper, 
+    createCameraHelper, 
+    createDirectialLightHelper 
+};
