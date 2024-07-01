@@ -138,7 +138,7 @@ class Gui {
                     case 'scene-dropdown':
                         if (this.#sceneChanged) return;
                         this.#sceneChanged = true;
-                        target(val);
+                        find.changeFn(val);
                         break;
                     case 'light-num':
                         find.changeFn();

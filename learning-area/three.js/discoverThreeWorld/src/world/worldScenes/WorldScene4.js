@@ -4,6 +4,7 @@ import { Earth } from '../components/basic/Earth.js';
 import { Plane } from '../components/basic/Plane.js';
 import { BoxCube } from '../components/basic/BoxCube.js';
 import { Train } from '../components/composite/train/Train.js';
+import { setupShadowLight, updateSingleLightCamera } from '../components/shadowMaker.js';
 import { WorldScene } from './WorldScene.js';
 
 const sceneName = 'Tank';
@@ -42,7 +43,7 @@ const hemisphereLightCtlSpecs = {
 };
 
 const guiRightSpecs = {
-    parents: [],
+    parents: {},
     details: [{
         folder: 'Directional Light',
         parent: 'mainLight',
@@ -242,7 +243,9 @@ class WorldScene4 extends WorldScene {
             createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
 
         // shadow light setup
-        this.setupShadowLight(this.#lights.mainLight);
+        this.shadowLightObjects = setupShadowLight.call(this,
+            this.scene, 
+            {light: this.#lights.mainLight, name: 'mainLight'});
 
         // Gui setup
         if (worldSceneSpecs.enableGui) {
@@ -266,11 +269,16 @@ class WorldScene4 extends WorldScene {
                 }]
             });
             this.guiRightSpecs.details.forEach(detail => {
-                detail.specs.forEach(spec => {
-                    if (spec.hasOwnProperty('changeFn') && spec.type === 'light-num') {
-                        spec['changeFn'] = this.updateMainLightCamera.bind(this, this.shadowLightObjects);
-                    }
-                })
+                switch (detail.parent) {
+                    case 'mainLight':
+                        const lightObj = this.shadowLightObjects.find(o => o.name === 'mainLight');
+                        detail.specs.forEach(spec => {
+                            if (spec.hasOwnProperty('changeFn') && spec.type === 'light-num') {
+                                spec['changeFn'] = updateSingleLightCamera.bind(this, lightObj, this.render.bind(this), true);
+                            }
+                        })
+                        break;
+                }
             });
         }
         

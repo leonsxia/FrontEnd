@@ -41,7 +41,7 @@ const hemisphereLightCtlSpecs = {
 };
 
 const guiRightSpecs = {
-    parents: [],
+    parents: {},
     details: [{
         folder: 'Directional Light',
         parent: 'mainLight',
