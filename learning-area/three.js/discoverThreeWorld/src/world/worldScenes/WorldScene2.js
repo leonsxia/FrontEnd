@@ -1,5 +1,5 @@
 import { Train } from '../components/composite/train/Train.js';
-import { createAxesHelper, createGridHelper } from '../components/helpers.js';
+import { createAxesHelper, createGridHelper } from '../components/utils/helpers.js';
 import { createLights } from '../components/lights.js';
 import { WorldScene } from './WorldScene.js';
 

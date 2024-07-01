@@ -1,4 +1,4 @@
-import { createAxesHelper, createGridHelper } from '../components/helpers.js';
+import { createAxesHelper, createGridHelper } from '../components/utils/helpers.js';
 import { createLights } from '../components/lights.js';
 import { Earth } from '../components/basic/Earth.js';
 import { Plane } from '../components/basic/Plane.js';
@@ -20,6 +20,7 @@ const worldSceneSpecs = {
     moveType: 'tankmove'
 };
 const mainLightCtlSpecs = {
+    name: 'mainLight',
     color: [255, 255, 255],
     intensity: 3,
     position: [-10, 20, 8.5]
@@ -32,15 +33,35 @@ const pointLightCtlSpecs = {
     decay: 1    // default 2
 };
 const ambientLightCtlSpecs = {
+    name: 'ambientLight',
     color: [128, 128, 128],
     intensity: 1
 }
 const hemisphereLightCtlSpecs = {
+    name: 'hemisphereLight',
     groundColor: [47, 79, 79],
     skyColor: [160, 160, 160],
     intensity: 3,
     position: [0, 1, 0] // light emit from top to bottom
 };
+const pointLightSpecs = [
+    {
+        name: 'pointLight1',
+        detail: {
+            color: [200, 100, 0],
+            position: [0, 0, 0],
+            intensity: 50,
+            distance: 0,    // infinity far
+            decay: 1    // default 2
+        }
+    }
+];
+const spotLightSpecs = [
+    {
+        name: 'spotLight1',
+        detail: {}
+    }
+];
 
 const guiRightSpecs = {
     parents: {},

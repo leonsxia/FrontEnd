@@ -1,4 +1,4 @@
-import { createAxesHelper, createGridHelper } from '../components/helpers.js';
+import { createAxesHelper, createGridHelper } from '../components/utils/helpers.js';
 import { createLights } from '../components/lights.js';
 import { BirdsGroup } from '../components/composite/birds/Birds.js'
 import { WorldScene } from './WorldScene.js';

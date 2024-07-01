@@ -1,4 +1,4 @@
-import { createCameraHelper, createDirectialLightHelper } from '../components/helpers.js';
+import { createCameraHelper, createDirectialLightHelper } from './utils/helpers.js';
 
 function setupShadowLight(scene, ...lights) {
     const shadowLightObjects = [];
