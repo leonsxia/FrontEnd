@@ -1,4 +1,4 @@
-import { createAxesHelper, createCameraHelper, createDirectialLightHelper, createGridHelper } from '../components/helpers.js';
+import { createAxesHelper, createGridHelper } from '../components/helpers.js';
 import { createLights } from '../components/lights.js';
 import { Earth } from '../components/basic/Earth.js';
 import { Plane } from '../components/basic/Plane.js';
@@ -218,8 +218,6 @@ const guiRightSpecs = {
 class WorldScene4 extends WorldScene {
     #loaded = false;
     #lights = { mainLight: null, pointLight: null, ambientLight: null, hemisphereLight: null };
-    #mainLightHelper;
-    #mainShadowCamHelper;
 
     constructor(container, renderer, globalConfig, eventDispatcher) {
         Object.assign(worldSceneSpecs, globalConfig)
@@ -238,16 +236,16 @@ class WorldScene4 extends WorldScene {
             size: 50,
             divisions: 50
         }
-        this.#mainShadowCamHelper = createCameraHelper(this.#lights.mainLight.shadow.camera);
-        this.#mainLightHelper = createDirectialLightHelper(this.#lights.mainLight);
-        this.loop.updatables = [this.controls.defControl];
-        this.scene.add(this.#lights.mainLight, this.#lights.hemisphereLight, this.#lights.ambientLight, this.camera, 
-            createAxesHelper(axesSpecs), createGridHelper(gridSpecs), 
-            this.#mainShadowCamHelper, 
-            this.#mainLightHelper);
 
+        this.loop.updatables = [this.controls.defControl];
+        this.scene.add(this.#lights.hemisphereLight, this.#lights.ambientLight, this.camera, 
+            createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
+
+        // shadow light setup
+        this.setupShadowLight(this.#lights.mainLight);
+
+        // Gui setup
         if (worldSceneSpecs.enableGui) {
-            this.attachLightHelper(this.#lights.mainLight);
             guiRightSpecs.parents = this.#lights;
             this.guiRightSpecs = guiRightSpecs;
             Object.assign(this.guiLeftSpecs.parents, {
@@ -267,20 +265,14 @@ class WorldScene4 extends WorldScene {
                     type: 'function'
                 }]
             });
-            // Object.assign(this.guiRightSpecs)
             this.guiRightSpecs.details.forEach(detail => {
                 detail.specs.forEach(spec => {
                     if (spec.hasOwnProperty('changeFn') && spec.type === 'light-num') {
-                        spec['changeFn'] = this.updateMainLightCamera.bind(this);
+                        spec['changeFn'] = this.updateMainLightCamera.bind(this, this.shadowLightObjects);
                     }
                 })
             });
         }
-
-        this.setShadowCamProps(this.#lights.mainLight.shadow.camera);
-        this.addShadow(this.#lights.mainLight);
-        // fix when change light position or target, the shadow camera won't update at first frame.
-        this.updateMainLightCamera();
         
         return {
             name: this.name,
@@ -363,58 +355,6 @@ class WorldScene4 extends WorldScene {
         this.scene.add(ground.mesh, earth.mesh, box.mesh, train.group);
         this.initContainer();
         this.#loaded = true;
-    }
-
-    addShadow(light) {
-        light.castShadow = true;
-		light.shadow.mapSize.width = 2048;
-		light.shadow.mapSize.height = 2048;
-
-		const w = 76;
-        const h = 76;
-        light.shadow.camera.width = w;
-        light.shadow.camera.height = h;
-		light.shadow.camera.near = 1;
-		light.shadow.camera.far = 70;
-		light.shadow.bias = 0.001;
-    }
-
-    setShadowCamProps(camera) {
-        Object.defineProperty(camera, 'width', {
-            get() {
-                return this.right * 2;
-            },
-            set(value) {
-                this.left = value / - 2;
-                this.right = value / 2;
-            }
-        });
-        Object.defineProperty(camera, 'height', {
-            get() {
-                return this.top * 2;
-            },
-            set(value) {
-                this.bottom = value / - 2;
-                this.top = value / 2;
-            }
-        });
-    }
-
-    attachLightHelper(light) {
-        light['lightHelper'] = this.#mainLightHelper;
-        light['lightShadowCamHelper'] = this.#mainShadowCamHelper;
-    }
-
-    updateMainLightCamera() {
-        const { mainLight } = this.#lights;
-        // update the light target's matrixWorld because it's needed by the helper
-        mainLight.target.updateMatrixWorld();
-        this.#mainLightHelper.update();
-        // update the light's shadow camera's projection matrix
-        mainLight.shadow.camera.updateProjectionMatrix();
-        // and now update the camera helper we're using to show the light's shadow camera
-        this.#mainShadowCamHelper.update();
-        this.render();
     }
 }
 
