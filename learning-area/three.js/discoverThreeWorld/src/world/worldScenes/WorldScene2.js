@@ -99,7 +99,7 @@ class WorldScene2 extends WorldScene {
         // shadow light setup, including light helper
         this.renderer.shadowMap.enabled = worldSceneSpecs.enableShadow;
         this.shadowLightObjects = setupShadowLight.call(this,
-            this.scene, mainLightCtlSpecs, ...pointLightSpecsArr
+            this.scene, mainLightCtlSpecs, hemisphereLightCtlSpecs, ...pointLightSpecsArr
         );
 
         if (worldSceneSpecs.enableGui) {
