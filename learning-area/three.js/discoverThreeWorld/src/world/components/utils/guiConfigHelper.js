@@ -205,15 +205,53 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
                 name: 'skyColor',
                 value: hemisphereLightSpecs.detail,
                 params: [255],
-                type: 'color'
+                type: 'color',
+                changeFn: null
             }, {
                 name: 'groundColor',
                 value: hemisphereLightSpecs.detail,
                 params: [255],
-                type: 'groundColor'
+                type: 'groundColor',
+                changeFn: null
             }]
         });
+
+        if (hemisphereLightSpecs.debug) {
+            const find = specs.find(s => s.parent === hemisphereLightSpecs.name).specs;
+            find.push({
+                name: 'x',
+                prop: 'position.x',
+                value: null,
+                sub: 'position',
+                params: [-25, 25],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'y',
+                prop: 'position.y',
+                value: null,
+                sub: 'position',
+                params: [0, 25],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'z',
+                prop: 'position.z',
+                value: null,
+                sub: 'position',
+                params: [-25, 25],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'visible',
+                prop: 'light helper',
+                value: null,
+                sub: 'lightHelper',
+                type: 'boolean'
+            });
+        }
     }
+
     return specs;
 }
 
@@ -226,7 +264,22 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
             specs: [{
                 name: 'intensity',
                 value: null,
-                params: [0, 50],
+                params: [0, 100, 0.1],
+                type: 'number'
+            }, {
+                name: 'power',
+                value: null,
+                params: [0, 1000, 1],
+                type: 'number'
+            }, {
+                name: 'distance',
+                value: null,
+                params: [-0.5, 100, 0.01],
+                type: 'number'
+            }, {
+                name: 'decay',
+                value: null,
+                params: [-10, 10, 0.01],
                 type: 'number'
             }, {
                 name: 'color',
@@ -236,6 +289,95 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
                 changeFn: null
             }]
         });
+        if (point.debug) {
+            const find = specs.find(s => s.parent === point.name).specs;
+            find.push({
+                name: 'x',
+                prop: 'position.x',
+                value: null,
+                sub: 'position',
+                params: [-25, 25],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'y',
+                prop: 'position.y',
+                value: null,
+                sub: 'position',
+                params: [0, 25],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'z',
+                prop: 'position.z',
+                value: null,
+                sub: 'position',
+                params: [-25, 25],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'visible',
+                prop: 'light helper',
+                value: null,
+                sub: 'lightHelper',
+                type: 'boolean'
+            });
+
+            if (point.shadow) {
+                find.push({
+                    name: 'fov',
+                    prop: 'shadow cam fov',
+                    value: null,
+                    sub: 'shadow',
+                    subprop: 'camera',
+                    params: [1, 100],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'aspect',
+                    prop: 'shadow cam aspect',
+                    value: null,
+                    sub: 'shadow',
+                    subprop: 'camera',
+                    params: [0.5, 2],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'near',
+                    prop: 'shadow cam near',
+                    value: null,
+                    sub: 'shadow',
+                    subprop: 'camera',
+                    params: [0.1, 10, 0.1],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'far',
+                    prop: 'shadow cam far',
+                    value: null,
+                    sub: 'shadow',
+                    subprop: 'camera',
+                    params: [100, 1000, 0.1],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'zoom',
+                    prop: 'shadow cam zoom',
+                    value: null,
+                    sub: 'shadow',
+                    subprop: 'camera',
+                    params: [0.01, 1.5, 0.01],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'visible',
+                    prop: 'shadow camera',
+                    value: null,
+                    sub: 'lightShadowCamHelper',
+                    type: 'boolean'
+                });
+            }
+        }
     });
     return specs;
 }

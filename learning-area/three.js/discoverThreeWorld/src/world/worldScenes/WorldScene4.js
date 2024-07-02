@@ -58,11 +58,11 @@ const hemisphereLightCtlSpecs = {
 };
 const pointLightSpecsArr = [
     {
-        name: 'cameraPointLight',
-        display: 'Camera Point Light',
+        name: 'pointLight1',
+        display: 'Point Light 1',
         detail: {
-            color: [200, 100, 0],
-            position: [0, 0, 0],
+            color: [223, 216, 17],
+            position: [-5, 10, 0],
             intensity: 50,
             distance: 0,    // infinity far
             decay: 1    // default 2
@@ -103,10 +103,10 @@ class WorldScene4 extends WorldScene {
         this.#basicLights = createBasicLights(mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs);
         this.#pointLights = createPointLights(pointLightSpecsArr);
 
-        this.camera.add(this.#pointLights['cameraPointLight']);
+        // this.camera.add(this.#pointLights['cameraSpotLight']);
 
         this.loop.updatables = [this.controls.defControl];
-        this.scene.add(this.#basicLights.hemisphereLight, this.#basicLights.ambientLight, this.camera, 
+        this.scene.add(this.#basicLights.hemisphereLight, this.#basicLights.ambientLight, //this.camera, 
             createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
 
         // shadow light setup, including light helper
@@ -176,6 +176,18 @@ class WorldScene4 extends WorldScene {
         ground.setRotation([-.5 * Math.PI, 0, 0]);
         ground.receiveShadow(true);
 
+        // ceiling
+        const ceilingSpecs = {
+            width: 100,
+            height: 100,
+            color: 0xcccccc,
+            name: 'ceiling'
+        };
+        const ceiling = new Plane(groudSpecs);
+        ceiling.setRotation([.5 * Math.PI, 0, 0]);
+        ceiling.setPosition([0, 20, 0]);
+        ceiling.receiveShadow(true);
+
         // earth
         const earthSpecs = {
             surfaceMap: 'assets/textures/earth_surface_2048.jpg',
@@ -193,6 +205,7 @@ class WorldScene4 extends WorldScene {
         earth.setPosition([0, 10, 0]);
         earth.setRotation([0.25, 0, 0]);
         earth.castShadow(true);
+        earth.receiveShadow(true);
 
         // box cube
         const boxSpecs = {
@@ -209,6 +222,7 @@ class WorldScene4 extends WorldScene {
         box.setRotation([0.25, -0.25, 0]);
         box.setPosition([-10, 10, 0]);
         box.castShadow(true);
+        box.receiveShadow(true);
 
         const train = new Train('red train 2');
         this.subscribeEvents(train, worldSceneSpecs.moveType);
@@ -220,7 +234,7 @@ class WorldScene4 extends WorldScene {
             box.init(boxSpecs)
         ]);
         this.loop.updatables.push(earth, train, box);
-        this.scene.add(ground.mesh, earth.mesh, box.mesh, train.group);
+        this.scene.add(ground.mesh, ceiling.mesh, earth.mesh, box.mesh, train.group);
         this.initContainer();
         this.#loaded = true;
     }

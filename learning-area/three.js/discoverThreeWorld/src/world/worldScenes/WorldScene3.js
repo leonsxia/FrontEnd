@@ -59,22 +59,7 @@ const hemisphereLightCtlSpecs = {
     debug: true,
     visible: true
 };
-const pointLightSpecsArr = [
-    {
-        name: 'cameraPointLight',
-        display: 'Camera Point Light',
-        detail: {
-            color: [204, 204, 204], // #cccccc
-            position: [0, 0, 0],
-            intensity: 50,
-            distance: 0,    // infinity far
-            decay: 1    // default 2
-        },
-        debug: true,
-        shadow: true,
-        visible: true
-    }
-];
+const pointLightSpecsArr = [];
 // axes, grid helper
 const axesSpecs = {
     size: 3,
@@ -99,11 +84,11 @@ class WorldScene3 extends WorldScene {
         this.#basicLights = createBasicLights(mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs);
         this.#pointLights = createPointLights(pointLightSpecsArr);
 
-        this.camera.add(this.#pointLights['cameraPointLight']);
-
+        // this.camera.add(this.#pointLights['cameraSpotLight']);
         
         this.loop.updatables = [this.controls.defControl];
-        this.scene.add(this.#basicLights.hemisphereLight,  this.camera, createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
+        this.scene.add(this.#basicLights.hemisphereLight,  //this.camera, 
+            createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
 
         // shadow light setup, including light helper
         this.renderer.shadowMap.enabled = worldSceneSpecs.enableShadow;

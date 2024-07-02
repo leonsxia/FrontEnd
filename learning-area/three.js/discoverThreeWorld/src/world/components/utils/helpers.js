@@ -1,4 +1,4 @@
-import { AxesHelper, GridHelper, CameraHelper, DirectionalLightHelper } from 'three';
+import { AxesHelper, GridHelper, CameraHelper, DirectionalLightHelper, HemisphereLightHelper, PointLightHelper } from 'three';
 
 function createAxesHelper(spcs) {
     const helper = new AxesHelper(spcs.size);
@@ -23,9 +23,21 @@ function createDirectialLightHelper(light) {
     return helper;
 }
 
+function createHemisphereLightHelper(light) {
+    const helper = new HemisphereLightHelper(light);
+    return helper;
+}
+
+function createPointLightHelper(light) {
+    const helper = new PointLightHelper(light);
+    return helper;
+}
+
 export {
     createAxesHelper, 
     createGridHelper, 
     createCameraHelper, 
-    createDirectialLightHelper 
+    createDirectialLightHelper,
+    createHemisphereLightHelper,
+    createPointLightHelper
 };
