@@ -5,7 +5,10 @@ import { Resizer } from '../systems/Resizer.js';
 import { Loop } from '../systems/Loop.js';
 import { Gui } from '../systems/Gui.js';
 import { updateSingleLightCamera } from '../components/shadowMaker.js';
-import { makeGuiPanel, makeDropdownGuiConfig } from '../components/utils/guiConfigHelper.js';
+import { makeGuiPanel, makeDropdownGuiConfig, makeFunctionGuiConfig, makeSceneRightGuiConfig } from '../components/utils/guiConfigHelper.js';
+
+const CONTROL_TITLES = ['Lights Control', 'Objects Control'];
+const INITIAL_RIGHT_PANEL = 'Lights Control';
 
 class WorldScene {
     name = 'default scene';
@@ -17,9 +20,12 @@ class WorldScene {
     controls = null;
     container = null;
     staticRendering = true;
+    lights = {};
     gui = null;
-    guiRightSpecs = {};
+    guiRightLightsSpecs = {};
     guiLeftSpecs = {};
+    guiLights = {};
+    guiObjects = {};
     eventDispatcher;
     shadowLightObjects = [];
 
@@ -52,10 +58,15 @@ class WorldScene {
             this.gui = new Gui();
             this.controls.initPanels(this.gui);
             this.guiLeftSpecs = makeGuiPanel();
-            this.guiLeftSpecs.details.push(makeDropdownGuiConfig(
-                'Select World', 'selectWorld', 'scene', { scene: specs.name },
-                specs.scenes, specs.changeCallback
-            ));
+            this.guiLeftSpecs.details.push(makeDropdownGuiConfig({
+                folder: 'Select World',
+                parent: 'selectWorld',
+                name: 'scene',
+                value: { scene: specs.name },
+                params: specs.scenes,
+                type: 'scene-dropdown',
+                changeFn: specs.changeCallback
+            }));
         }
     }
 
@@ -63,13 +74,17 @@ class WorldScene {
         this.container.append(this.renderer.domElement);
         this.controls.defControl.enabled = true;
         if (this.gui) {
-            this.gui.show();
             this.initGUIControl();
         }
     }
 
     initGUIControl() {
-        this.gui.init({ attachedTo: this, left: this.guiLeftSpecs, right: this.guiRightSpecs });
+        this.gui.init({ 
+            attachedTo: this, 
+            left: this.guiLeftSpecs, 
+            right_lights: this.guiRightLightsSpecs,
+            initialRightPanel: INITIAL_RIGHT_PANEL
+        });
     }
 
     render() {
@@ -143,10 +158,36 @@ class WorldScene {
         });
     }
 
+    setupGuiConfig() {
+        const rightGuiConfig = makeSceneRightGuiConfig(this.guiLights);
+
+        Object.assign(rightGuiConfig.parents, this.lights);
+        this.guiRightLightsSpecs = rightGuiConfig;
+        
+        this.setupLeftFunctionPanle();
+        this.guiLeftSpecs.details.push(makeFunctionGuiConfig('Actions', 'actions'));
+        this.guiLeftSpecs.details.push(makeDropdownGuiConfig({
+            folder: 'Select Control',
+            parent: 'selectControl',
+            name: 'control',
+            value: { control: INITIAL_RIGHT_PANEL },
+            params: CONTROL_TITLES,
+            type: 'dropdown',
+            changeFn: this.gui.selectControl.bind(this.gui)
+        } ));
+        
+        // bind callback to light helper and shadow cam helper
+        this.bindLightShadowHelperGuiCallback();
+    }
+
+    setupObjectsGuiConfig() {
+
+    }
+
     bindLightShadowHelperGuiCallback() {
         // bind callback to light helper and shadow cam helper
         this.shadowLightObjects.forEach(lightObj => {
-            const { specs } = this.guiRightSpecs.details.find(d => d.parent === lightObj.name);
+            const { specs } = this.guiRightLightsSpecs.details.find(d => d.parent === lightObj.name);
             const changeObjs = specs.filter(s => s.hasOwnProperty('changeFn') && (s.type === 'light-num' || s.type === 'color' || s.type === 'groundColor'));
             changeObjs.forEach(o => {
                 o['changeFn'] = updateSingleLightCamera.bind(this, lightObj, true);

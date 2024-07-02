@@ -5,7 +5,6 @@ import { Plane } from '../components/basic/Plane.js';
 import { BoxCube } from '../components/basic/BoxCube.js';
 import { Train } from '../components/composite/train/Train.js';
 import { setupShadowLight } from '../components/shadowMaker.js';
-import { makeFunctionGuiConfig, makeSceneRightGuiConfig } from '../components/utils/guiConfigHelper.js';
 import { WorldScene } from './WorldScene.js';
 
 const sceneName = 'Tank';
@@ -30,8 +29,10 @@ const mainLightCtlSpecs = {
         intensity: 3,
         position: [-10, 20, 8.5]
     },
+    type: 'directional',
     debug: true,
     shadow: true,
+    shadow_debug: true,
     visible: true
 };
 const ambientLightCtlSpecs = {
@@ -41,6 +42,7 @@ const ambientLightCtlSpecs = {
         color: [128, 128, 128],
         intensity: 1
     },
+    type: 'ambient',
     debug: true,
     visible: true
 }
@@ -53,9 +55,11 @@ const hemisphereLightCtlSpecs = {
         intensity: 3,
         position: [0, 1, 0] // light emit from top to bottom
     },
+    type: 'hemisphere',
     debug: true,
     visible: true
 };
+const basicLightSpecsArr = [mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs];
 const pointLightSpecsArr = [
     {
         name: 'pointLight1',
@@ -69,6 +73,7 @@ const pointLightSpecsArr = [
         },
         debug: true,
         shadow: true,
+        shadow_debug: false,
         visible: true
     }
 ];
@@ -93,53 +98,34 @@ const gridSpecs = {
 
 class WorldScene4 extends WorldScene {
     #loaded = false;
-    #basicLights = { mainLight: null, ambientLight: null, hemisphereLight: null };
+    #basicLights = {};
     #pointLights = {};
 
     constructor(container, renderer, globalConfig, eventDispatcher) {
         Object.assign(worldSceneSpecs, globalConfig)
         super(container, renderer, worldSceneSpecs, eventDispatcher);
 
-        this.#basicLights = createBasicLights(mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs);
+        this.#basicLights = createBasicLights(basicLightSpecsArr);
         this.#pointLights = createPointLights(pointLightSpecsArr);
+        Object.assign(this.lights, this.#basicLights);
+        Object.assign(this.lights, this.#pointLights);
 
         // this.camera.add(this.#pointLights['cameraSpotLight']);
 
         this.loop.updatables = [this.controls.defControl];
-        this.scene.add(this.#basicLights.hemisphereLight, this.#basicLights.ambientLight, //this.camera, 
+        this.scene.add( //this.camera, 
             createAxesHelper(axesSpecs), createGridHelper(gridSpecs));
 
         // shadow light setup, including light helper
         this.renderer.shadowMap.enabled = worldSceneSpecs.enableShadow;
         this.shadowLightObjects = setupShadowLight.call(this,
-            this.scene, mainLightCtlSpecs, hemisphereLightCtlSpecs, ...pointLightSpecsArr
+            this.scene, ...basicLightSpecsArr, ...pointLightSpecsArr
         );
 
         // Gui setup
         if (worldSceneSpecs.enableGui) {
-
-            const rightGuiConfig = makeSceneRightGuiConfig(
-                mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs, 
-                pointLightSpecsArr
-            );
-
-            Object.assign(rightGuiConfig.parents, this.#basicLights);
-            Object.assign(rightGuiConfig.parents, this.#pointLights);
-            this.guiRightSpecs = rightGuiConfig;
-            // assgin left panel parents
-            Object.assign(this.guiLeftSpecs.parents, {
-                'actions': {
-                    start: this.start.bind(this),
-                    stop: this.stop.bind(this),
-                    moveCamera: this.moveCamera.bind(this),
-                    resetCamera: this.resetCamera.bind(this),
-                    focusNext: this.focusNext.bind(this)
-                }
-            });
-            this.guiLeftSpecs.details.push(makeFunctionGuiConfig('Actions', 'actions'));
-            
-            // bind callback to light helper and shadow cam helper
-            this.bindLightShadowHelperGuiCallback();
+            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr };
+            this.setupGuiConfig();
         }
         
         return {
@@ -238,6 +224,19 @@ class WorldScene4 extends WorldScene {
         this.scene.add(ground.mesh, ceiling.mesh, earth.mesh, box.mesh, train.group);
         this.initContainer();
         this.#loaded = true;
+    }
+
+    setupLeftFunctionPanle() {
+        // assgin left panel parents
+        Object.assign(this.guiLeftSpecs.parents, {
+            'actions': {
+                start: this.start.bind(this),
+                stop: this.stop.bind(this),
+                moveCamera: this.moveCamera.bind(this),
+                resetCamera: this.resetCamera.bind(this),
+                focusNext: this.focusNext.bind(this)
+            }
+        });
     }
 }
 

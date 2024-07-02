@@ -4,18 +4,35 @@ function colorStr(r, g, b) {
     return `rgb(${r},${g},${b})`;
 }
 
-function createBasicLights(directLightSpecs, ambientLightSpecs, hemisphereLightSpecs) {
+function createBasicLights(basicLightSpecsArr) {
     const lights = {};
-    lights[directLightSpecs.name] = new DirectionalLight(new Color(colorStr(...directLightSpecs.detail.color)), directLightSpecs.detail.intensity);
-    lights[ambientLightSpecs.name] = new AmbientLight(new Color(colorStr(...ambientLightSpecs.detail.color)), ambientLightSpecs.detail.intensity);
-    lights[hemisphereLightSpecs.name] = new HemisphereLight(new Color(colorStr(...hemisphereLightSpecs.detail.skyColor)), new Color(colorStr(...hemisphereLightSpecs.detail.groundColor)), hemisphereLightSpecs.detail.intensity);
-
-    lights[directLightSpecs.name].position.set(...directLightSpecs.detail.position);
-    lights[hemisphereLightSpecs.name].position.set(...hemisphereLightSpecs.detail.position);
-
-    directLightSpecs.light = lights[directLightSpecs.name];
-    ambientLightSpecs.light = lights[ambientLightSpecs.name];
-    hemisphereLightSpecs.light = lights[hemisphereLightSpecs.name];
+    basicLightSpecsArr.forEach(spec => {
+        switch (spec.type) {
+            case 'directional':
+                {
+                    const { name, detail: { color, intensity, position } } = spec;
+                    lights[name] = new DirectionalLight(new Color(colorStr(...color)), intensity);
+                    lights[name].position.set(...position);
+                    spec.light = lights[name];
+                }
+                break;
+            case 'ambient':
+                {
+                    const { name, detail: { color, intensity } } = spec;
+                    lights[name] = new AmbientLight(new Color(colorStr(...color)), intensity);
+                    spec.light = lights[name];
+                }
+                break;
+            case 'hemisphere':
+                {
+                    const { name, detail: { color, groundColor, skyColor, intensity, position } } = spec;
+                    lights[name] = new HemisphereLight(new Color(colorStr(...skyColor)), new Color(colorStr(...groundColor)), intensity);
+                    lights[name].position.set(...position);
+                    spec.light = lights[name];
+                }
+                break;
+        }
+    });
 
     return lights;
 }

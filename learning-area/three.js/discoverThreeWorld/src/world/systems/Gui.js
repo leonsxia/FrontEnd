@@ -1,6 +1,7 @@
 import { GUI } from 'lil-gui';
 import Stats from 'stats.js';
 
+const CONTROL_TITLES = ['Menu', 'Lights Control', 'Objects Control'];
 class Gui {
     #guis = [];
     #stats = null;
@@ -9,10 +10,13 @@ class Gui {
     #guiLoaded = false;
     #saveObj = null;
     #sceneChanged = false;
+    #currentRightPanel;
+    #initialRightPanel;
 
     constructor () {
-        this.#guis.push(new GUI({ width: 140}));
-        this.#guis.push(new GUI({ title: 'Objects Control' }));
+        this.#guis.push(new GUI({ title: CONTROL_TITLES[0], width: 140}));
+        this.#guis.push(new GUI({ title: CONTROL_TITLES[1] }));
+        this.#guis.push(new GUI({ title: CONTROL_TITLES[2] }));
         this.#guis.forEach(gui => gui.hide());
     }
 
@@ -25,15 +29,18 @@ class Gui {
     }
 
     init(specs) {
+        this.show();
+        this.#initialRightPanel = this.#currentRightPanel = specs.initialRightPanel;
+        this.showIntialRight(this.#initialRightPanel);
         this.#stats = new Stats();
         this.#stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
         document.body.appendChild(this.#stats.dom);
         if (this.#guiLoaded) return;
         this.#guiLoaded = true;
-        Object.assign(Object.assign(this.#objects, specs.left.parents), specs.right.parents);
+        Object.assign(Object.assign(this.#objects, specs.left.parents), specs.right_lights.parents);
         this.#attachedTo = specs.attachedTo;
         this.initLeft(specs.left);
-        this.initRight(specs.right);
+        this.initRightLights(specs.right_lights);
     }
 
     initLeft(specs) {
@@ -44,7 +51,7 @@ class Gui {
         this.bindChange(this.#guis[0], eventObjs);
     }
 
-    initRight(specs) {
+    initRightLights(specs) {
         const eventObjs = [];
         this.addControl(this.#guis[1], specs, eventObjs);
         specs.functions = {};
@@ -101,6 +108,7 @@ class Gui {
                     case 'light-num':
                         folder.add(parent, property, ...spec.params).name(displayName).identifier = target;
                         break;
+                    case 'dropdown':
                     case 'scene-dropdown':
                         folder.add(parent, property, spec.params).name(displayName).identifier = target;
                         break;
@@ -142,6 +150,10 @@ class Gui {
                         this.#sceneChanged = true;
                         find.changeFn(val);
                         break;
+                    case 'dropdown':
+                        if (this.#sceneChanged) return;
+                        find.changeFn(val);
+                        break;
                     case 'light-num':
                         find.changeFn();
                         break;
@@ -155,14 +167,41 @@ class Gui {
         this.#guis.forEach(gui => gui.show());
     }
 
+    showAt(title) {
+        const find = this.#guis.find(g => g._title === title);
+        if (find) find.show();
+    }
+
+    showIntialRight(title) {
+        const rightCtlNames = [];
+        CONTROL_TITLES.forEach(c => {
+            if (c !== 'Menu') rightCtlNames.push(c);
+        })
+        rightCtlNames.forEach(c => {
+            if (c === title) this.showAt(title);
+            else this.hideAt(c);
+        })
+    }
+
     hide() {
         this.#guis.forEach(gui => gui.hide());
+    }
+
+    hideAt(title) {
+        const find = this.#guis.find(g => g._title === title);
+        if (find) find.hide();
     }
 
     reset() {
         this.#guis.forEach(gui => gui.reset());
         this.#sceneChanged = false;
         document.body.removeChild(this.#stats.dom);
+    }
+
+    selectControl(title) {
+        this.hideAt(this.#currentRightPanel);
+        this.showAt(title);
+        this.#currentRightPanel = title;
     }
 
     colorStr(r, g, b) {

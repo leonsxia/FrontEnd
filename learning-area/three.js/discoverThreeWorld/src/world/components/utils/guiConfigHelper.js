@@ -24,7 +24,8 @@ function makeFunctionGuiConfig(folder, parent) {
     };
 }
 
-function makeDropdownGuiConfig(folder, parent, name, value, params, changeFn) {
+function makeDropdownGuiConfig(specs) {
+    const { folder, parent, name, value, params, type, changeFn } = specs;
     return {
         folder,
         parent,
@@ -32,18 +33,17 @@ function makeDropdownGuiConfig(folder, parent, name, value, params, changeFn) {
             name,
             value,
             params,
-            type: 'scene-dropdown',
+            type,
             changeFn
         }]
     }
 }
 
-function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphereLightSpecs) {
-    const specs = [];
+function addDirectionalLight(light, specs) {
     // main directional light
     specs.push({
-        folder: directLightSpecs.display,
-        parent: directLightSpecs.name,
+        folder: light.display,
+        parent: light.name,
         specs: [{
             name: 'intensity',
             value: null,
@@ -51,14 +51,14 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
             type: 'number'
         }, {
             name: 'color',
-            value: directLightSpecs.detail,
+            value: light.detail,
             params: [255],
             type: 'color',
             changeFn: null
         }]
     });
-    if (directLightSpecs.debug) {
-        const find = specs.find(s => s.parent === directLightSpecs.name).specs;
+    if (light.debug) {
+        const find = specs.find(s => s.parent === light.name).specs;
         find.push({
             name: 'x',
             prop: 'position.x',
@@ -118,7 +118,7 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
             type: 'boolean'
         });
 
-        if (directLightSpecs.shadow) {
+        if (light.shadow_debug) {
             find.push({
                 name: 'width',
                 prop: 'shadow cam width',
@@ -173,11 +173,14 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
             });
         }
     }
+}
+
+function addAmbientLight(light, specs) {
     // ambient light
-    if (ambientLightSpecs.visible) {
+    if (light.visible) {
         specs.push({
-            folder: ambientLightSpecs.display,
-            parent: ambientLightSpecs.name,
+            folder: light.display,
+            parent: light.name,
             specs: [{
                 name: 'intensity',
                 value: null,
@@ -185,17 +188,20 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
                 type: 'number'
             }, {
                 name: 'color',
-                value: ambientLightSpecs.detail,
+                value: light.detail,
                 params: [255],
                 type: 'color'
             }]
         });
     }
+}
+
+function addHemisphereLight(light, specs) {
     // hemisphere light
-    if (hemisphereLightSpecs.visible) {
+    if (light.visible) {
         specs.push({
-            folder: hemisphereLightSpecs.display,
-            parent: hemisphereLightSpecs.name,
+            folder: light.display,
+            parent: light.name,
             specs: [{
                 name: 'intensity',
                 value: null,
@@ -203,21 +209,21 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
                 type: 'number'
             }, {
                 name: 'skyColor',
-                value: hemisphereLightSpecs.detail,
+                value: light.detail,
                 params: [255],
                 type: 'color',
                 changeFn: null
             }, {
                 name: 'groundColor',
-                value: hemisphereLightSpecs.detail,
+                value: light.detail,
                 params: [255],
                 type: 'groundColor',
                 changeFn: null
             }]
         });
 
-        if (hemisphereLightSpecs.debug) {
-            const find = specs.find(s => s.parent === hemisphereLightSpecs.name).specs;
+        if (light.debug) {
+            const find = specs.find(s => s.parent === light.name).specs;
             find.push({
                 name: 'x',
                 prop: 'position.x',
@@ -251,6 +257,23 @@ function makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphere
             });
         }
     }
+}
+
+function makeBasicLightGuiConfig(basicLightSpecsArr) {
+    const specs = [];
+    basicLightSpecsArr.forEach(basic => {
+        switch (basic.type) {
+            case 'directional':
+                addDirectionalLight(basic, specs);
+                break;
+            case 'ambient':
+                addAmbientLight(basic, specs);
+                break;
+            case 'hemisphere':
+                addHemisphereLight(basic, specs);
+                break;
+        }
+    });
 
     return specs;
 }
@@ -323,7 +346,7 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
                 type: 'boolean'
             });
 
-            if (point.shadow) {
+            if (point.shadow_debug) {
                 find.push({
                     name: 'fov',
                     prop: 'shadow cam fov',
@@ -382,14 +405,24 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
     return specs;
 }
 
-function makeSceneRightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphereLightSpecs, pointLightSpecsArr) {
+function makeSceneRightGuiConfig(lightSpecs) {
     const panel = makeGuiPanel();
     panel.details = combineGuiConfigs(
-        makeBasicLightGuiConfig(directLightSpecs, ambientLightSpecs, hemisphereLightSpecs),
-        makePointLightGuiConfig(pointLightSpecsArr)
+        makeBasicLightGuiConfig(lightSpecs.basicLightSpecsArr),
+        makePointLightGuiConfig(lightSpecs.pointLightSpecsArr)
     );
     return panel;
 }
 
+function attachObjectsToRightGuiConfig(objectSpecsArr) {
+    // todo
+}
 
-export { makeGuiPanel, makeFunctionGuiConfig, makeDropdownGuiConfig, makeSceneRightGuiConfig };
+
+export { 
+    makeGuiPanel, 
+    makeFunctionGuiConfig, 
+    makeDropdownGuiConfig, 
+    makeSceneRightGuiConfig,
+    attachObjectsToRightGuiConfig
+ };

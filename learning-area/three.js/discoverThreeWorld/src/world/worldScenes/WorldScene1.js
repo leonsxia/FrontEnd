@@ -5,7 +5,6 @@ import * as Sphere from '../components/basic/sphere.js';
 import { createBasicLights, createPointLights } from '../components/lights.js';
 import { createMeshGroup } from '../components/basic/meshGroup.js';
 import { setupShadowLight } from '../components/shadowMaker.js';
-import { makeFunctionGuiConfig, makeSceneRightGuiConfig } from '../components/utils/guiConfigHelper.js';
 import { WorldScene } from './WorldScene.js';
 
 const sceneName = 'scene1';
@@ -29,8 +28,10 @@ const mainLightCtlSpecs = {
         intensity: 8,
         position: [-10, 10, 10]
     },
+    type: 'directional',
     debug: true,
     shadow: false,
+    shadow_debug: false,
     visible: true
 };
 const ambientLightCtlSpecs = {
@@ -40,6 +41,7 @@ const ambientLightCtlSpecs = {
         color: [128, 128, 128],
         intensity: 2
     },
+    type: 'ambient',
     debug: false,
     visible: false
 };
@@ -52,9 +54,11 @@ const hemisphereLightCtlSpecs = {
         intensity: 15,
         position: [0, 1, 0] // light emit from top to bottom
     },
+    type: 'hemisphere',
     debug: true,
     visible: true
 };
+const basicLightSpecsArr = [mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs];
 const pointLightSpecsArr = [];
 
 class WorldScene1 extends WorldScene  {
@@ -67,43 +71,26 @@ class WorldScene1 extends WorldScene  {
         Object.assign(worldSceneSpecs, globalConfig)
         super(container, renderer, worldSceneSpecs, eventDispatcher);
 
-        this.#basicLights = createBasicLights(mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs);
+        this.#basicLights = createBasicLights(basicLightSpecsArr);
         this.#pointLights = createPointLights(pointLightSpecsArr);
+        Object.assign(this.lights, this.#basicLights);
+        Object.assign(this.lights, this.#pointLights);
 
         // this.camera.add(this.#pointLights['cameraSpotLight']);
         
         this.loop.updatables = [this.controls.defControl];
-        this.scene.add(this.#basicLights.hemisphereLight); //, this.camera);
+        // this.scene.add(this.camera);
 
         // shadow light setup, including light helper
         this.renderer.shadowMap.enabled = worldSceneSpecs.enableShadow;
         this.shadowLightObjects = setupShadowLight.call(this,
-            this.scene, mainLightCtlSpecs, hemisphereLightCtlSpecs, ...pointLightSpecsArr
+            this.scene, ...basicLightSpecsArr, ...pointLightSpecsArr
         );
 
         // Gui setup
         if (worldSceneSpecs.enableGui) {
-            const rightGuiConfig = makeSceneRightGuiConfig(
-                mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs, 
-                pointLightSpecsArr
-            );
-            Object.assign(rightGuiConfig.parents, this.#basicLights);
-            Object.assign(rightGuiConfig.parents, this.#pointLights);
-            this.guiRightSpecs = rightGuiConfig;
-            // assgin left panel parents
-            Object.assign(this.guiLeftSpecs.parents, {
-                'actions': {
-                    start: this.start.bind(this),
-                    stop: this.stop.bind(this),
-                    moveCamera: this.moveCamera.bind(this),
-                    resetCamera: this.resetCamera.bind(this),
-                    focusNext: this.focusNext.bind(this)
-                }
-            });
-            this.guiLeftSpecs.details.push(makeFunctionGuiConfig('Actions', 'actions'));
-
-            // bind callback to light helper and shadow cam helper
-            this.bindLightShadowHelperGuiCallback();
+            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr };
+            this.setupGuiConfig();
         }
         return {
             name: this.name,
@@ -201,6 +188,19 @@ class WorldScene1 extends WorldScene  {
         this.scene.add(sphere, cube, box.mesh, earth.mesh, meshGroup);
         this.initContainer();
         this.#loaded = true;
+    }
+
+    setupLeftFunctionPanle() {
+        // assgin left panel parents
+        Object.assign(this.guiLeftSpecs.parents, {
+            'actions': {
+                start: this.start.bind(this),
+                stop: this.stop.bind(this),
+                moveCamera: this.moveCamera.bind(this),
+                resetCamera: this.resetCamera.bind(this),
+                focusNext: this.focusNext.bind(this)
+            }
+        });
     }
 }
 
