@@ -62,7 +62,7 @@ const pointLightSpecsArr = [
         display: 'Point Light 1',
         detail: {
             color: [223, 216, 17],
-            position: [-5, 10, 0],
+            position: [7.8, 10, 0],
             intensity: 50,
             distance: 0,    // infinity far
             decay: 1    // default 2
@@ -221,6 +221,7 @@ class WorldScene4 extends WorldScene {
         const box = new BoxCube(boxSpecs);
         box.setRotation([0.25, -0.25, 0]);
         box.setPosition([-10, 10, 0]);
+        box.setScale([3, 3, 3]);
         box.castShadow(true);
         box.receiveShadow(true);
 

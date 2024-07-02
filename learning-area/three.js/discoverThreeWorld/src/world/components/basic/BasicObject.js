@@ -44,6 +44,10 @@ class BasicObject {
         this.mesh.rotation.set(...trans);
     }
 
+    setScale(scale) {
+        this.mesh.scale.set(...scale);
+    }
+
     castShadow(cast) {
         this.mesh.castShadow = cast;
     }
