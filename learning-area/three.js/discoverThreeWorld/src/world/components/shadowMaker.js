@@ -78,12 +78,11 @@ function setupShadowLight(scene, ...lights) {
             if (lightHelper) scene.add(lightHelper);
             if (lightObj.shadow_debug) {
                 if (lightShadowCamHelper) scene.add(lightShadowCamHelper);
-                attachShadowCamProps(light);
-                
             }
             if (lightHelper) attachLightHelper(light, lightHelper, lightShadowCamHelper);
         }
         if (lightObj.shadow) {
+            attachShadowCamProps(light); // add width an height to directional light for shadow setup
             addShadow(light);
         }
     });
@@ -164,7 +163,7 @@ function updateSingleLightCamera(lightObj, needRender = false) {
             {
                 const { light, lightHelper, lightShadowCamHelper } = lightObj;
                 // update the light target's matrixWorld because it's needed by the helper
-                light.target.updateMatrixWorld();
+                light.target.updateMatrixWorld(); // update when debug is false, and manually change the light target
                 if (lightObj.debug) lightHelper.update();
                 // update the light's shadow camera's projection matrix
                 light.shadow.camera.updateProjectionMatrix();
@@ -194,7 +193,7 @@ function updateLightCamera(lights) {
     lights.forEach(lightObj => {
         updateSingleLightCamera.call(this, lightObj);
     });
-    this.render();
+    this.render();  // need render twice to update the shadow camera helper.
 }
 
 export { setupShadowLight, updateSingleLightCamera };
