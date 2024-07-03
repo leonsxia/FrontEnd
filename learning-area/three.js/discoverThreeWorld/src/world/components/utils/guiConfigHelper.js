@@ -122,7 +122,7 @@ function addDirectionalLight(light, specs) {
             type: 'boolean'
         });
 
-        if (light.shadow_debug) {
+        if (light.shadow_debug && light.shadow) {
             find.push({
                 name: 'width',
                 prop: 'shadow cam width',
@@ -350,7 +350,7 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
                 type: 'boolean'
             });
 
-            if (point.shadow_debug) {
+            if (point.shadow_debug && point.shadow) {
                 find.push({
                     name: 'fov',
                     prop: 'shadow cam fov',
@@ -517,7 +517,7 @@ function makeSpotLightGuiConfig(spotLightSpecsArr) {
                 type: 'boolean'
             });
 
-            if (spot.shadow_debug) {
+            if (spot.shadow_debug && spot.shadow) {
                 find.push(//{
                 //     name: 'fov',
                 //     prop: 'shadow cam fov',

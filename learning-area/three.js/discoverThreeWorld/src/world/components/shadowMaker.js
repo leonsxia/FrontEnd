@@ -11,51 +11,56 @@ function setupShadowLight(scene, ...lights) {
     const shadowLightObjects = []; // new object combine specs and light
     lights.filter(l => l.visible).forEach(l => {
         const { light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show } = l;
+        let lightObj = { light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show };
+        const addShadowCamHelper = () => {
+            if (shadow_debug && shadow) {
+                lightObj['lightShadowCamHelper'] = createCameraHelper(light.shadow.camera)
+            }
+        }
         switch (light.type) {
             case 'DirectionalLight':
-                addShadowLightObject(shadowLightObjects, l, createDirectialLightHelper(light));
+                if (debug) {
+                    lightObj['lightHelper'] = createDirectialLightHelper(light);
+                    addShadowCamHelper();
+                }
                 break;
             case 'HemisphereLight':
                 if (debug) {
-                    const lightObject = {
-                        light,
-                        lightHelper: createHemisphereLightHelper(light),
-                        name, debug, shadow, shadow_debug, helper_show, shadow_cam_show
-                    }
-                    shadowLightObjects.push(lightObject);
-                } else {
-                    shadowLightObjects.push({
-                        light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show
-                    });
+                    lightObj['lightHelper'] = createHemisphereLightHelper(light);
                 }
                 break;
             case 'PointLight':
-                addShadowLightObject(shadowLightObjects, l, createPointLightHelper(light));
+                if (debug) {
+                    lightObj['lightHelper'] = createPointLightHelper(light);
+                    addShadowCamHelper();
+                }
                 break;
             case 'SpotLight':
-                addShadowLightObject(shadowLightObjects, l, createSpotLightHelper(light));
+                if (debug) {
+                    lightObj['lightHelper'] = createSpotLightHelper(light);
+                    addShadowCamHelper();
+                }
                 break;
-            default:
-                shadowLightObjects.push({
-                    light, name, debug, shadow, shadow_debug
-                });
+            default: // ambient
+                lightObj = { light, name, debug, shadow };
                 break;
         }
+        shadowLightObjects.push(lightObj);
     });
 
     shadowLightObjects.forEach(lightObj => {
         const { light } = lightObj;
         scene.add(light);   // add light to scene
+        attachLightAdditionalProps(light); // add width and height to directional light for shadow setup
         if (lightObj.debug) {
             const { lightHelper, lightShadowCamHelper } = lightObj;
             if (lightHelper) scene.add(lightHelper);
-            if (lightObj.shadow_debug) {
+            if (lightObj.shadow_debug && lightObj.shadow) {
                 if (lightShadowCamHelper) scene.add(lightShadowCamHelper);
             }
             if (lightHelper) attachLightHelper(lightObj, lightHelper, lightShadowCamHelper);
         }
         if (lightObj.shadow) {
-            attachShadowCamProps(light); // add width and height to directional light for shadow setup
             addShadow(light);
         }
     });
@@ -64,27 +69,6 @@ function setupShadowLight(scene, ...lights) {
     // the shadow camera won't update at first static frame.
     updateLightCamera.call(this, shadowLightObjects);
     return shadowLightObjects;
-}
-
-function addShadowLightObject(shadowLightObjects, lightSpecs, lightHelper) {
-    const { light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show } = lightSpecs;
-    if (debug) {
-        const shadowLightObject = {
-            light,
-            lightHelper,
-            name, debug, shadow, shadow_debug, helper_show, shadow_cam_show
-        };
-        if (shadow_debug) {
-            Object.assign(shadowLightObject, {
-                lightShadowCamHelper: createCameraHelper(light.shadow.camera)
-            });
-        }
-        shadowLightObjects.push(shadowLightObject);
-    } else {
-        shadowLightObjects.push({
-            light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show
-        });
-    }
 }
 
 function addShadow(light) {
@@ -122,7 +106,7 @@ function addShadow(light) {
     }
 }
 
-function attachShadowCamProps(light) {
+function attachLightAdditionalProps(light) {
     switch (light.type) {
         case 'DirectionalLight':
             {
@@ -173,14 +157,14 @@ function attachLightHelper(lightObj, lightHelper, lightShadowCamHelper) {
 }
 
 function updateLightAndShadowCamHelper(lightObj) {
-    const { light, lightHelper, lightShadowCamHelper } = lightObj;
+    const { light, lightHelper, lightShadowCamHelper, debug, shadow, shadow_debug } = lightObj;
     // update the light target's matrixWorld because it's needed by the helper
     light.target.updateMatrixWorld(); // update when debug is false, and manually change the light target
-    if (lightObj.debug) lightHelper.update();
+    if (debug) lightHelper.update();
     // update the light's shadow camera's projection matrix
     light.shadow.camera.updateProjectionMatrix();
     // and now update the camera helper we're using to show the light's shadow camera
-    if (lightObj.debug && lightObj.shadow_debug) lightShadowCamHelper.update();
+    if (debug && shadow_debug && shadow) lightShadowCamHelper.update();
 }
 
 function updateSingleLightCamera(lightObj, needRender = false) {
@@ -196,10 +180,10 @@ function updateSingleLightCamera(lightObj, needRender = false) {
             break;
         case 'PointLight':
             {
-                const { light, lightHelper, lightShadowCamHelper } = lightObj;
-                if (lightObj.debug) lightHelper.update();
+                const { light, lightHelper, lightShadowCamHelper, debug, shadow, shadow_debug } = lightObj;
+                if (debug) lightHelper.update();
                 light.shadow.camera.updateProjectionMatrix();
-                if (lightObj.debug && lightObj.shadow_debug) lightShadowCamHelper.update();
+                if (debug && shadow_debug && shadow ) lightShadowCamHelper.update();
             }
             break;
         case 'SpotLight':
