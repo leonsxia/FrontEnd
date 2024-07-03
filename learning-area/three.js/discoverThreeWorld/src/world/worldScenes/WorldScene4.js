@@ -1,5 +1,5 @@
 import { createAxesHelper, createGridHelper } from '../components/utils/helpers.js';
-import { createBasicLights, createPointLights } from '../components/lights.js';
+import { createBasicLights, createPointLights, createSpotLights } from '../components/lights.js';
 import { Earth } from '../components/basic/Earth.js';
 import { Plane } from '../components/basic/Plane.js';
 import { BoxCube } from '../components/basic/BoxCube.js';
@@ -26,13 +26,16 @@ const mainLightCtlSpecs = {
     display: 'Directional Light',
     detail: {
         color: [255, 255, 255],
-        intensity: 3,
-        position: [-10, 20, 8.5]
+        intensity: 0.7,
+        position: [-10, 20, 8.5],
+        target: [0, 0, 0]
     },
     type: 'directional',
     debug: true,
     shadow: true,
     shadow_debug: true,
+    helper_show: false,
+    shadow_cam_show: false,
     visible: true
 };
 const ambientLightCtlSpecs = {
@@ -52,11 +55,12 @@ const hemisphereLightCtlSpecs = {
     detail: {
         groundColor: [47, 79, 79],
         skyColor: [160, 160, 160],
-        intensity: 3,
+        intensity: 0.5,
         position: [0, 1, 0] // light emit from top to bottom
     },
     type: 'hemisphere',
     debug: true,
+    helper_show: false,
     visible: true
 };
 const basicLightSpecsArr = [mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs];
@@ -65,24 +69,38 @@ const pointLightSpecsArr = [
         name: 'pointLight1',
         display: 'Point Light 1',
         detail: {
-            color: [223, 216, 17],
+            color: [254, 190, 16],
             position: [7.8, 10, 0],
             intensity: 50,
-            distance: 0,    // infinity far
+            distance: 0,    // infinite far
             decay: 1    // default 2
         },
         debug: true,
         shadow: true,
-        shadow_debug: false,
+        shadow_debug: true,
+        helper_show: true,
+        shadow_cam_show: false,
         visible: true
     }
 ];
 const spotLightSpecsArr = [
     {
         name: 'spotLight1',
-        detail: {},
+        display: 'Spot Light 1',
+        detail: {
+            color: [0, 127, 255],
+            position: [5, 5, -5],
+            target: [1, 0, 1],
+            intensity: 80,
+            distance: 0,    // infinite far
+            decay: 0.33,
+            penumbra: 0.2
+        },
         debug: true,
         shadow: true,
+        shadow_debug: true,
+        helper_show: true,
+        shadow_cam_show: false,
         visible: true
     }
 ];
@@ -100,6 +118,7 @@ class WorldScene4 extends WorldScene {
     #loaded = false;
     #basicLights = {};
     #pointLights = {};
+    #spotLights = {};
 
     constructor(container, renderer, globalConfig, eventDispatcher) {
         Object.assign(worldSceneSpecs, globalConfig)
@@ -107,8 +126,10 @@ class WorldScene4 extends WorldScene {
 
         this.#basicLights = createBasicLights(basicLightSpecsArr);
         this.#pointLights = createPointLights(pointLightSpecsArr);
+        this.#spotLights = createSpotLights(spotLightSpecsArr);
         Object.assign(this.lights, this.#basicLights);
         Object.assign(this.lights, this.#pointLights);
+        Object.assign(this.lights, this.#spotLights);
 
         // this.camera.add(this.#pointLights['cameraSpotLight']);
 
@@ -119,12 +140,12 @@ class WorldScene4 extends WorldScene {
         // shadow light setup, including light helper
         this.renderer.shadowMap.enabled = worldSceneSpecs.enableShadow;
         this.shadowLightObjects = setupShadowLight.call(this,
-            this.scene, ...basicLightSpecsArr, ...pointLightSpecsArr
+            this.scene, ...basicLightSpecsArr, ...pointLightSpecsArr, ...spotLightSpecsArr
         );
 
         // Gui setup
         if (worldSceneSpecs.enableGui) {
-            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr };
+            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr, spotLightSpecsArr };
             this.setupGuiConfig();
         }
         

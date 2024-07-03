@@ -188,7 +188,7 @@ class WorldScene {
         // bind callback to light helper and shadow cam helper
         this.shadowLightObjects.forEach(lightObj => {
             const { specs } = this.guiRightLightsSpecs.details.find(d => d.parent === lightObj.name);
-            const changeObjs = specs.filter(s => s.hasOwnProperty('changeFn') && (s.type === 'light-num' || s.type === 'color' || s.type === 'groundColor'));
+            const changeObjs = specs.filter(s => s.hasOwnProperty('changeFn') && (s.type === 'light-num' || s.type === 'color' || s.type === 'groundColor' || s.type === 'angle'));
             changeObjs.forEach(o => {
                 o['changeFn'] = updateSingleLightCamera.bind(this, lightObj, true);
             })

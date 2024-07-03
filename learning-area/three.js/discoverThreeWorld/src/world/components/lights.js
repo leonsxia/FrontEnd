@@ -1,4 +1,4 @@
-import { DirectionalLight, PointLight, AmbientLight, HemisphereLight, Color } from 'three';
+import { DirectionalLight, PointLight, AmbientLight, HemisphereLight, SpotLight, Color } from 'three';
 
 function colorStr(r, g, b) {
     return `rgb(${r},${g},${b})`;
@@ -6,29 +6,24 @@ function colorStr(r, g, b) {
 
 function createBasicLights(basicLightSpecsArr) {
     const lights = {};
-    basicLightSpecsArr.forEach(spec => {
+    basicLightSpecsArr.filter(l => l.visible).forEach(spec => {
         switch (spec.type) {
             case 'directional':
                 {
-                    const { name, detail: { color, intensity, position } } = spec;
-                    lights[name] = new DirectionalLight(new Color(colorStr(...color)), intensity);
-                    lights[name].position.set(...position);
-                    spec.light = lights[name];
+                    const { name } = spec;
+                    spec.light = lights[name] = createDirectionalLight(spec);
                 }
                 break;
             case 'ambient':
                 {
                     const { name, detail: { color, intensity } } = spec;
-                    lights[name] = new AmbientLight(new Color(colorStr(...color)), intensity);
-                    spec.light = lights[name];
+                    spec.light = lights[name] = new AmbientLight(new Color(colorStr(...color)), intensity);
                 }
                 break;
             case 'hemisphere':
                 {
-                    const { name, detail: { color, groundColor, skyColor, intensity, position } } = spec;
-                    lights[name] = new HemisphereLight(new Color(colorStr(...skyColor)), new Color(colorStr(...groundColor)), intensity);
-                    lights[name].position.set(...position);
-                    spec.light = lights[name];
+                    const { name } = spec;
+                    spec.light = lights[name] = createHemisphereLight(spec);
                 }
                 break;
         }
@@ -39,14 +34,62 @@ function createBasicLights(basicLightSpecsArr) {
 
 function createPointLights(pointLightSpecsArr) {
     const pointLights = {};
-    pointLightSpecsArr.forEach(point => {
-        const { name, detail: { color, position, intensity, distance, decay } } = point;
-        const pointLight = new PointLight(new Color(colorStr(...color)), intensity, distance, decay);
-        pointLight.position.set(...position);
-        pointLights[name] = pointLight;
-        point.light = pointLight;
+    pointLightSpecsArr.filter(l => l.visible).forEach(point => {
+        const { name } = point;
+        point.light = pointLights[name] = new createPointLight(point);
     });
     return pointLights;
 }
 
-export { createBasicLights, createPointLights };
+function createSpotLights(spotLihgtSpecsArr) {
+    const spotLights = {};
+    spotLihgtSpecsArr.filter(l => l.visible).forEach(spot => {
+        const { name } = spot;
+        spot.light = spotLights[name] = new createSpotLight(spot);
+    });
+    return spotLights;
+}
+
+function createDirectionalLight(lightSpecs) {
+    const { detail: { color, intensity, position, target } } = lightSpecs;
+    const light = new DirectionalLight(new Color(colorStr(...color)), intensity);
+    light.position.set(...position);
+    light.target.position.set(...target);
+    // no need to update target.updateMatrixWorld(), 
+    // the matrixWorld will update in render after its parent added to scene if light is in other object3D,
+    // or it will updated in shadowMaker.js at setup stage.
+    return light;
+}
+
+function createHemisphereLight(lightSpecs) {
+    const { detail: { groundColor, skyColor, intensity, position } } = lightSpecs;
+    const light = new HemisphereLight(new Color(colorStr(...skyColor)), new Color(colorStr(...groundColor)), intensity);
+    light.position.set(...position);
+    return light;
+}
+
+function createPointLight(lightSpecs) {
+    const { detail: { color, position, intensity, distance = 0, decay = 2 } } = lightSpecs;
+    const light = new PointLight(new Color(colorStr(...color)), intensity, distance, decay);
+    light.position.set(...position);
+    return light;
+}
+
+function createSpotLight(lightSpecs) {
+    const { detail: { color, position, target, intensity, distance = 0, angel = Math.PI / 3, penumbra = 0, decay = 2, map }} = lightSpecs;
+    const light = new SpotLight(new Color(colorStr(...color)), intensity, distance, angel, penumbra, decay);
+    light.position.set(...position);
+    light.target.position.set(...target);
+    if (map) light.map = map;
+    return light;
+}
+
+export { 
+    createBasicLights, 
+    createPointLights, 
+    createSpotLights,
+    createDirectionalLight,
+    createHemisphereLight,
+    createPointLight,
+    createSpotLight
+};

@@ -24,7 +24,8 @@ const mainLightCtlSpecs = {
     detail: {
         color: [255, 255, 255],
         intensity: 2,
-        position: [-10, 10, 10]
+        position: [-10, 10, 10],
+        target: [0, 0, 0]
     },
     type: 'directional',
     debug: true,
@@ -58,6 +59,7 @@ const hemisphereLightCtlSpecs = {
 };
 const basicLightSpecsArr = [mainLightCtlSpecs, ambientLightCtlSpecs, hemisphereLightCtlSpecs];
 const pointLightSpecsArr = [];
+const spotLightSpecsArr = [];
 // axes, grid helper
 const axesSpecs = {
     size: 3,
@@ -95,7 +97,7 @@ class WorldScene2 extends WorldScene {
         );
 
         if (worldSceneSpecs.enableGui) {
-            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr };
+            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr, spotLightSpecsArr };
             this.setupGuiConfig();
         }
         return {

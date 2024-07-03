@@ -106,6 +106,7 @@ class Gui {
                         break;
                     case 'number':
                     case 'light-num':
+                    case 'angle':
                         folder.add(parent, property, ...spec.params).name(displayName).identifier = target;
                         break;
                     case 'dropdown':
@@ -155,7 +156,8 @@ class Gui {
                         find.changeFn(val);
                         break;
                     case 'light-num':
-                        find.changeFn();
+                    case 'angle':
+                        if (find.changeFn) find.changeFn();
                         break;
                 }
             }
