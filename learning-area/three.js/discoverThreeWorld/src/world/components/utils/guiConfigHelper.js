@@ -124,6 +124,22 @@ function addDirectionalLight(light, specs) {
 
         if (light.shadow_debug && light.shadow) {
             find.push({
+                name: 'blurSamples',
+                prop: 'shadow blurSamples',
+                value: null,
+                sub: 'shadow',
+                params: [0, 20, 0.1],
+                type: 'light-num',
+                changeFn: null
+            }, {
+                name: 'radius',
+                prop: 'shadow radius',
+                value: null,
+                sub: 'shadow',
+                params: [0, 10, 0.1],
+                type: 'light-num',
+                changeFn: null
+            }, {
                 name: 'width',
                 prop: 'shadow cam width',
                 value: null,
@@ -356,6 +372,22 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
 
             if (point.shadow_debug && point.shadow) {
                 find.push({
+                    name: 'blurSamples',
+                    prop: 'shadow blurSamples',
+                    value: null,
+                    sub: 'shadow',
+                    params: [0, 20, 0.1],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'radius',
+                    prop: 'shadow radius',
+                    value: null,
+                    sub: 'shadow',
+                    params: [0, 10, 0.1],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
                     name: 'fov',
                     prop: 'shadow cam fov',
                     value: null,
@@ -537,6 +569,22 @@ function makeSpotLightGuiConfig(spotLightSpecsArr) {
                 //     changeFn: null
                 // }, 
                 {
+                    name: 'blurSamples',
+                    prop: 'shadow blurSamples',
+                    value: null,
+                    sub: 'shadow',
+                    params: [0, 20, 0.1],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
+                    name: 'radius',
+                    prop: 'shadow radius',
+                    value: null,
+                    sub: 'shadow',
+                    params: [0, 10, 0.1],
+                    type: 'light-num',
+                    changeFn: null
+                }, {
                     name: 'aspect',
                     prop: 'shadow cam aspect',
                     value: null,

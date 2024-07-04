@@ -98,6 +98,7 @@ function addShadow(light) {
             break;
         case 'SpotLight':
             {
+                light.shadow.radius = 4.5;
                 light.shadow.camera.fov = 50;
                 light.shadow.camera.aspect = 1;
                 light.shadow.camera.near = 0.5;
