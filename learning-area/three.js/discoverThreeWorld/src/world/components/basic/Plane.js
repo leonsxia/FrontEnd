@@ -13,10 +13,15 @@ class Plane extends BasicObject {
     }
 
     async init (specs) {
-        const [map] = await Promise.all([new TextureLoader().loadAsync(specs.map)]);
-        this.#map = map;
-        this.#map.colorSpace = SRGBColorSpace;
-        this.mesh.material = this.material = new MeshPhongMaterial({ map: this.#map });
+        const { map } = specs;
+        const [texture] = await Promise.all([
+            map ? new TextureLoader().loadAsync(map) : new Promise(resolve => resolve(null))
+        ]);
+        if (texture) {
+            this.#map = texture;
+            this.#map.colorSpace = SRGBColorSpace;
+            this.mesh.material = this.material = new MeshPhongMaterial({ map: this.#map });
+        }
     }
 }
 

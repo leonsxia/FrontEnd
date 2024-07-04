@@ -174,6 +174,10 @@ function addDirectionalLight(light, specs) {
                 value: null,
                 sub: 'lightShadowCamHelper',
                 type: 'boolean'
+            }, {
+                name: 'castShadow',
+                value: null,
+                type: 'boolean'
             });
         }
     }
@@ -402,6 +406,10 @@ function makePointLightGuiConfig(pointLightSpecsArr) {
                     value: null,
                     sub: 'lightShadowCamHelper',
                     type: 'boolean'
+                }, {
+                    name: 'castShadow',
+                    value: null,
+                    type: 'boolean'
                 });
             }
         }
@@ -569,6 +577,10 @@ function makeSpotLightGuiConfig(spotLightSpecsArr) {
                     prop: 'shadow camera',
                     value: null,
                     sub: 'lightShadowCamHelper',
+                    type: 'boolean'
+                }, {
+                    name: 'castShadow',
+                    value: null,
                     type: 'boolean'
                 });
             }

@@ -1,9 +1,11 @@
 import { MeshStandardMaterial } from 'three';
 
 function createBasicMaterials() {
-    const basic = new MeshStandardMaterial({ color: '#999999' });
+    const basic = new MeshStandardMaterial({ color: 0x777777 });
 
     return { basic };
 }
 
-export { createBasicMaterials };
+const basicMateraials = createBasicMaterials();
+
+export { basicMateraials };

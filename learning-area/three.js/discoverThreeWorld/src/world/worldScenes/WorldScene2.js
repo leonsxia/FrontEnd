@@ -1,6 +1,6 @@
-import { Train } from '../components/composite/train/Train.js';
 import { createAxesHelper, createGridHelper } from '../components/utils/helpers.js';
 import { createBasicLights, createPointLights } from '../components/lights.js';
+import { Train } from '../components/Models.js';
 import { setupShadowLight } from '../components/shadowMaker.js';
 import { WorldScene } from './WorldScene.js';
 

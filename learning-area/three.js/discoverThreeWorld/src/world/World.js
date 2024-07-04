@@ -2,13 +2,12 @@ import { WorldScene1 } from "./worldScenes/WorldScene1";
 import { WorldScene2 } from "./worldScenes/WorldScene2";
 import { WorldScene3 } from "./worldScenes/WorldScene3";
 import { WorldScene4 } from "./worldScenes/WorldScene4";
+
 import { createRenderer } from "./systems/renderer";
-import { createBasicMaterials } from "./components/basic/basicMaterial";
 import { EventDispatcher } from "./systems/EventDispatcher";
 
 const config = { 
-    scenes: ['scene1', 'RunningTrain', 'Birds', 'Tank'],  // scene list for scene selector
-    basicMaterial: createBasicMaterials().basic
+    scenes: ['BasicObjects', 'RunningTrain', 'Birds', 'Lighting'],  // scene list for scene selector
 };
 const movementTypes = ['tankmove'];
 const moveActions = ['movingLeft', 'movingRight', 'movingForward', 'movingBackward', 'accelerate'];

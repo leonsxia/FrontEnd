@@ -1,13 +1,9 @@
-import * as Cube from '../components/basic/cube.js';
-import { Earth } from '../components/basic/Earth.js';
-import { BoxCube } from '../components/basic/BoxCube.js';
-import * as Sphere from '../components/basic/sphere.js';
+import { CubeMaker, SphereMaker, Sphere, BoxCube, MeshGroup } from '../components/Models.js';
 import { createBasicLights, createPointLights } from '../components/lights.js';
-import { createMeshGroup } from '../components/basic/meshGroup.js';
 import { setupShadowLight } from '../components/shadowMaker.js';
 import { WorldScene } from './WorldScene.js';
 
-const sceneName = 'scene1';
+const sceneName = 'BasicObjects';
 const worldSceneSpecs = {
     name: sceneName,
     camera: {
@@ -124,7 +120,7 @@ class WorldScene1 extends WorldScene  {
                 heightSegments: 32
             }
         }
-        const sphere = Sphere.createSphere(sphereSpecs);
+        const sphere = SphereMaker.createSphere(sphereSpecs);
         sphere.position.set(-10, 0, 0);
         sphere.rotation.set(0.25, 0, 0);
 
@@ -139,7 +135,7 @@ class WorldScene1 extends WorldScene  {
             },
             basicMaterial: worldSceneSpecs.basicMaterial
         }
-        const cube = Cube.createCube(cubeSpecs);
+        const cube = CubeMaker.createCube(cubeSpecs);
         cube.position.set(-5, 0, 0);
 
         // box cube
@@ -150,8 +146,7 @@ class WorldScene1 extends WorldScene  {
                 width: 2,
                 height: 3,
                 depth: 3
-            },
-            basicMaterial: worldSceneSpecs.basicMaterial
+            }
         }
         const box = new BoxCube(boxSpecs);
         box.setRotation([0.25, -0.25, 0]);
@@ -167,10 +162,9 @@ class WorldScene1 extends WorldScene  {
                 radius: 2,
                 widthSegments: 32,
                 heightSegments: 32
-            },
-            basicMaterial: worldSceneSpecs.basicMaterial
+            }
         }
-        const earth = new Earth(earthSpecs);
+        const earth = new Sphere(earthSpecs);
         earth.setPosition([5, 0, 0]);
         earth.setRotation([0.25, 0, 0]);
 
@@ -178,11 +172,11 @@ class WorldScene1 extends WorldScene  {
         const meshGroupSpecs = {
             position: [10, 0, 0]
         };
-        const meshGroup = createMeshGroup(meshGroupSpecs);
+        const meshGroup = MeshGroup.createMeshGroup(meshGroupSpecs);
         
         await Promise.all([
-            Sphere.loadMaterial(sphereSpecs),
-            Cube.loadMaterial(cubeSpecs),
+            SphereMaker.loadMaterial(sphereSpecs),
+            CubeMaker.loadMaterial(cubeSpecs),
             box.init(boxSpecs),
             earth.init(earthSpecs)
         ]);

@@ -1,13 +1,10 @@
 import { createAxesHelper, createGridHelper } from '../components/utils/helpers.js';
 import { createBasicLights, createPointLights, createSpotLights } from '../components/lights.js';
-import { Earth } from '../components/basic/Earth.js';
-import { Plane } from '../components/basic/Plane.js';
-import { BoxCube } from '../components/basic/BoxCube.js';
-import { Train } from '../components/composite/train/Train.js';
+import { Train, Sphere, BoxCube, Plane } from '../components/Models.js';
 import { setupShadowLight } from '../components/shadowMaker.js';
 import { WorldScene } from './WorldScene.js';
 
-const sceneName = 'Tank';
+const sceneName = 'Lighting';
 const worldSceneSpecs = {
     name: sceneName,
     camera: {
@@ -190,7 +187,7 @@ class WorldScene4 extends WorldScene {
             color: 0xcccccc,
             name: 'ceiling'
         };
-        const ceiling = new Plane(groudSpecs);
+        const ceiling = new Plane(ceilingSpecs);
         ceiling.setRotation([.5 * Math.PI, 0, 0]);
         ceiling.setPosition([0, 20, 0]);
         ceiling.receiveShadow(true);
@@ -205,10 +202,9 @@ class WorldScene4 extends WorldScene {
                 radius: 2,
                 widthSegments: 32,
                 heightSegments: 32
-            },
-            basicMaterial: worldSceneSpecs.basicMaterial
+            }
         }
-        const earth = new Earth(earthSpecs);
+        const earth = new Sphere(earthSpecs);
         earth.setPosition([0, 10, 0]);
         earth.setRotation([0.25, 0, 0]);
         earth.castShadow(true);

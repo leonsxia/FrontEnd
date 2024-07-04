@@ -1,11 +1,11 @@
 import { createCamera } from '../components/camera.js';
 import { createScene } from '../components/scene.js';
 import { WorldControls } from '../systems/Controls.js';
+import { updateSingleLightCamera } from '../components/shadowMaker.js';
+import { makeGuiPanel, makeDropdownGuiConfig, makeFunctionGuiConfig, makeSceneRightGuiConfig } from '../components/utils/guiConfigHelper.js';
 import { Resizer } from '../systems/Resizer.js';
 import { Loop } from '../systems/Loop.js';
 import { Gui } from '../systems/Gui.js';
-import { updateSingleLightCamera } from '../components/shadowMaker.js';
-import { makeGuiPanel, makeDropdownGuiConfig, makeFunctionGuiConfig, makeSceneRightGuiConfig } from '../components/utils/guiConfigHelper.js';
 
 const CONTROL_TITLES = ['Lights Control', 'Objects Control'];
 const INITIAL_RIGHT_PANEL = 'Lights Control';

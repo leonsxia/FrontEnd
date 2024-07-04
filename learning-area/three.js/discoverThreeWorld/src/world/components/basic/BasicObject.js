@@ -1,4 +1,5 @@
 import { PlaneGeometry, BoxGeometry, SphereGeometry, MeshStandardMaterial, TextureLoader, SRGBColorSpace } from 'three';
+import { basicMateraials } from './basicMaterial';
 
 class BasicObject {
     #map = null;
@@ -7,7 +8,6 @@ class BasicObject {
     mesh = null;
 
     constructor(type, specs) {
-        const { basicMaterial } = specs;
         switch (type) {
             case 'plane':
                 {
@@ -26,7 +26,7 @@ class BasicObject {
                 this.geometry = new SphereGeometry(radius, widthSegments, heightSegments);
                 break;
         }
-        this.material = basicMaterial;
+        this.material = basicMateraials.basic;;
     }
 
     async initBasic(specs) {

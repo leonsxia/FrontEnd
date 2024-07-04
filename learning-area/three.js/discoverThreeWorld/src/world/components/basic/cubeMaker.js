@@ -1,27 +1,32 @@
 import { BoxGeometry, Mesh, MeshStandardMaterial, TextureLoader, MathUtils, SRGBColorSpace } from 'three'
+import { basicMateraials } from './basicMaterial';
 
-let material = new MeshStandardMaterial({ color: 0x050505 });
-let cube = null;
+const material = basicMateraials.basic;
 
-async function loadMaterial(spc) {
+async function loadMaterial(specs) {
+    const { cube, map } = specs;
     const textureLoader = new TextureLoader();
-    const [map] = await Promise.all([textureLoader.loadAsync(spc.map)])
-    map.colorSpace = SRGBColorSpace;
-    cube.material = material = new MeshStandardMaterial({map: map});
-    // cube.onTextureLoad();
+    const [texture] = await Promise.all([
+        map ? textureLoader.loadAsync(map) : new Promise(resolve => resolve(null))
+    ]);
+    if (texture) {
+        texture.colorSpace = SRGBColorSpace;
+        cube.material = new MeshStandardMaterial({map: texture});
+    }
 }
 
-function createCube(spc = {}) {
+function createCube(specs = {}) {
+    const {size: {width, height, depth}, name} = specs;
     // create a geometry
-    const geometry = new BoxGeometry(spc.size.width, spc.size.height, spc.size.depth);
+    const geometry = new BoxGeometry(width, height, depth);
 
     // create a default (white) basic material
     // switch the old "basic" material to a physically correct "standard" materail
     // createMaterial(spc);
 
     // create a mesh containing the geometry and material
-    cube = new Mesh(geometry, material);
-    cube.name = spc.name;
+    const cube = new Mesh(geometry, material);
+    cube.name = name;
 
     const radiansPerSecond = MathUtils.degToRad(30);
 
@@ -32,7 +37,7 @@ function createCube(spc = {}) {
         cube.rotation.x += radiansPerSecond * delta;
         cube.rotation.y += radiansPerSecond * delta;
     };
-
+    specs.cube = cube;
     return cube;
 }
 

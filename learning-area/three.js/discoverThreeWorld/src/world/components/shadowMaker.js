@@ -9,6 +9,7 @@ import {
 
 function setupShadowLight(scene, ...lights) {
     const shadowLightObjects = []; // new object combine specs and light
+    if (!lights || lights.length === 0) return;
     lights.filter(l => l.visible).forEach(l => {
         const { light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show } = l;
         let lightObj = { light, name, debug, shadow, shadow_debug, helper_show, shadow_cam_show };
