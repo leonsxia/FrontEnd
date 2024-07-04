@@ -8,11 +8,11 @@ function createMeshes() {
     const materials = createMaterials();
 
     const cabin = new Mesh(geometires.cabin, materials.body);
-    cabin.position.set(0, 1.4, -1.5);
+    cabin.position.set(0, 1.3, -1.5);
     cabin.rotation.y = Math.PI / 2;
 
     const chimney = new Mesh(geometires.chimney, materials.detail);
-    chimney.position.set(0, 1.9, 2);
+    chimney.position.set(0, 1.8, 2);
     chimney.rotation.y = Math.PI / 2;
 
     const nose = new Mesh(geometires.nose, materials.body);
@@ -21,7 +21,7 @@ function createMeshes() {
     nose.rotation.y = Math.PI / 2;
 
     const smallWheelRear = new Mesh(geometires.wheel, materials.detail);
-    smallWheelRear.position.y = 0.5;
+    smallWheelRear.position.y = 0.4;
     smallWheelRear.rotation.x = Math.PI / 2;
     smallWheelRear.rotation.z = Math.PI / 2;
 
@@ -32,7 +32,7 @@ function createMeshes() {
     smallWheelFront.position.z = 2;
 
     const bigWheel = smallWheelRear.clone();
-    bigWheel.position.set(0, 0.9, -1.5);
+    bigWheel.position.set(0, 0.8, -1.5);
     bigWheel.scale.set(2, 1.25, 2);
 
     return { cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel };
