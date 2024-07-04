@@ -9,6 +9,7 @@ import { Gui } from '../systems/Gui.js';
 
 const CONTROL_TITLES = ['Lights Control', 'Objects Control'];
 const INITIAL_RIGHT_PANEL = 'Lights Control';
+const RESOLUTION_RATIO = {'0.5x': 0.5, '0.8x': 0.8, '1x': 1, '2x': 2};
 
 class WorldScene {
     name = 'default scene';
@@ -167,21 +168,32 @@ class WorldScene {
         this.setupLeftFunctionPanle();
         this.guiLeftSpecs.details.push(makeFunctionGuiConfig('Actions', 'actions'));
         this.guiLeftSpecs.details.push(makeDropdownGuiConfig({
+            folder: 'Change Resolution',
+            parent: 'changeResolution',
+            name: 'ratio',
+            value: { ratio: 1 },
+            params: RESOLUTION_RATIO,
+            type: 'dropdown',
+            changeFn: this.changeResolution.bind(this)
+        }));
+        this.guiLeftSpecs.details.push(makeDropdownGuiConfig({
             folder: 'Select Control',
             parent: 'selectControl',
             name: 'control',
             value: { control: INITIAL_RIGHT_PANEL },
             params: CONTROL_TITLES,
-            type: 'dropdown',
+            type: 'control-dropdown',
             changeFn: this.gui.selectControl.bind(this.gui)
-        } ));
+        }));
         
         // bind callback to light helper and shadow cam helper
         this.bindLightShadowHelperGuiCallback();
     }
 
-    setupObjectsGuiConfig() {
-
+    setupObjectsGuiConfig() {}
+    
+    changeResolution (ratio) {
+        this.#resizer.changeResolution(ratio);
     }
 
     bindLightShadowHelperGuiCallback() {

@@ -111,6 +111,7 @@ class Gui {
                         break;
                     case 'dropdown':
                     case 'scene-dropdown':
+                    case 'control-dropdown':
                         folder.add(parent, property, spec.params).name(displayName).identifier = target;
                         break;
                     case 'color':
@@ -151,8 +152,9 @@ class Gui {
                         this.#sceneChanged = true;
                         find.changeFn(val);
                         break;
-                    case 'dropdown':
+                    case 'control-dropdown':
                         if (this.#sceneChanged) return;
+                    case 'dropdown':
                         find.changeFn(val);
                         break;
                     case 'light-num':
