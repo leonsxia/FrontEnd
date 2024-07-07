@@ -7,7 +7,7 @@ import { createRenderer } from "./systems/renderer";
 import { EventDispatcher } from "./systems/EventDispatcher";
 
 const config = { 
-    scenes: ['BasicObjects', 'RunningTrain', 'Birds', 'Lighting'],  // scene list for scene selector
+    scenes: ['BasicObjects', 'RunningTrain', 'Birds', 'Simple Physics'],  // scene list for scene selector
 };
 const movementTypes = ['tankmove'];
 const moveActions = ['movingLeft', 'movingRight', 'movingForward', 'movingBackward', 'accelerate'];

@@ -35,7 +35,19 @@ function createMeshes() {
     bigWheel.position.set(0, 0.8, -1.5);
     bigWheel.scale.set(2, 1.25, 2);
 
-    return { cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel };
+    const boundingBox = new Mesh(geometires.boundingBox, materials.boundingBox);
+    boundingBox.name = 'boundingBox';
+    boundingBox.position.set(0, 1.3, 0);
+    boundingBox.visible = false;
+    boundingBox.geometry.computeBoundingBox();
+
+    const width = 1.5;
+    const depth = 5;
+    const height = 2.25;
+
+    return { cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
+        boundingBox, width, depth, height
+     };
 }
 
 export { createMeshes };

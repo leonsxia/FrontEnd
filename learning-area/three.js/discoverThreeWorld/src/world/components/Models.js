@@ -6,3 +6,4 @@ export { Sphere } from './basic/Sphere.js';
 export { Plane } from './basic/Plane.js';
 export { BirdsGroup } from './composite/birds/Birds.js';
 export { Train } from './composite/train/Train.js';
+export { Tofu } from './composite/tofu/Tofu.js';

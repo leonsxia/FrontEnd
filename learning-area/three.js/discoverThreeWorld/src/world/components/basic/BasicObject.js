@@ -6,8 +6,11 @@ class BasicObject {
     geometry = null;
     material = null;
     mesh = null;
+    name = '';
 
     constructor(type, specs) {
+        const { name } = specs;
+        if (name) this.name = name;
         switch (type) {
             case 'plane':
                 {
@@ -40,8 +43,8 @@ class BasicObject {
         this.mesh.position.set(...pos);
     }
 
-    setRotation(trans) {
-        this.mesh.rotation.set(...trans);
+    setRotation(rot) {
+        this.mesh.rotation.set(...rot);
     }
 
     setScale(scale) {

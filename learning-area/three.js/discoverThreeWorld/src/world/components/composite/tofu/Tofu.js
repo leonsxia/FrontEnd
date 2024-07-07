@@ -2,7 +2,7 @@ import { Group, Box3, Box3Helper, Vector3 } from 'three';
 import { createMeshes } from './meshes';
 import { Moveable2D } from '../../movement/Moveable2D';
 
-class Train extends Moveable2D {
+class Tofu extends Moveable2D {
     name = '';
     group;
     meshes;
@@ -18,14 +18,9 @@ class Train extends Moveable2D {
         this.name = name;
         this.group = new Group();
         this.meshes = createMeshes();
-
-        const {
-            cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-            boundingBox, width, depth, height
-        } = this.meshes;
+        const { body, slotLeft, slotRight, boundingBox, width, depth, height } = this.meshes;
         this.group.add(
-            cabin, nose, chimney, smallWheelRear, smallWheelCenter, smallWheelFront, bigWheel,
-            boundingBox
+            body, slotLeft, slotRight, boundingBox
         );
         this.w = width;
         this.d = depth;
@@ -80,7 +75,7 @@ class Train extends Moveable2D {
     }
 
     get velocity() {
-        return this.isAccelerating ? 13.89 : 2.55;
+        return this.isAccelerating ? 10 : 4;
     }
 
     updateBoundingBoxHelper() {
@@ -106,54 +101,6 @@ class Train extends Moveable2D {
         this.group.scale.set(...scale);
     }
 
-    setTickParams(delta) {
-        const radius = 3;
-        const R = this.isAccelerating ? radius * 2.5 : radius;
-        const Rl = 0.8;
-        const Rs = 0.4;
-        const rotateVel = this.velocity / R;
-        const smallWheelRotateVel = this.velocity / Rs;
-        const largeWheelRotateVel = this.velocity / Rl;
-        const dist = this.velocity * delta;
-        const params = {
-            group: this.group, R, rotateVel, dist, delta, 
-            smallWheelRotateVel, largeWheelRotateVel
-        };
-
-        return params;
-    }
-    
-    tick(delta) {
-        const params = this.setTickParams(delta);
-        this.tankmoveTick(params);
-        this.tickWheels(delta, params);
-        this.updateBoundingBoxHelper();
-    }
-
-    tickWithWall(delta, wall) {
-        const params = this.setTickParams(delta);
-        params.wall = wall;
-        params.wall.position.y = 0;
-        this.tankmoveTickWithWallDebug(params);
-        this.tickWheels(delta, params);
-        this.updateBoundingBoxHelper();
-    }
-
-    tickWheels(delta, params) {
-        const { smallWheelRotateVel, largeWheelRotateVel } = params;
-        if (this.isForward) {
-            this.meshes.bigWheel.rotation.x += delta * largeWheelRotateVel;
-            this.meshes.smallWheelFront.rotation.x += delta * smallWheelRotateVel;
-            this.meshes.smallWheelCenter.rotation.x += delta * smallWheelRotateVel;
-            this.meshes.smallWheelRear.rotation.x += delta * smallWheelRotateVel;
-        }else if (this.isBackward) {
-            this.meshes.bigWheel.rotation.x -= delta * largeWheelRotateVel;
-            this.meshes.smallWheelFront.rotation.x -= delta * smallWheelRotateVel;
-            this.meshes.smallWheelCenter.rotation.x -= delta * smallWheelRotateVel;
-            this.meshes.smallWheelRear.rotation.x -= delta * smallWheelRotateVel;
-        }
-    }
-
     castShadow(cast) {
         this.group.children.forEach(child => {
             if (child.isMesh) {
@@ -169,6 +116,33 @@ class Train extends Moveable2D {
             }
         });
     }
+
+    setTickParams(delta) {
+        const radius = 2;
+        const R = this.isAccelerating ? radius * 2.5 : radius;
+        // const vel = this.isAccelerating ? 5.1 : 2.55; // 50km/h - 20km/s
+        const rotateVel = this.velocity / R;
+        const dist = this.velocity * delta;
+        const params = {
+            group: this.group, R, rotateVel, dist, delta
+        };
+
+        return params;
+    }
+
+    tick(delta) {
+        const params = this.setTickParams(delta);
+        this.tankmoveTick(params);
+        this.updateBoundingBoxHelper();
+    }
+
+    tickWithWall(delta, wall) {
+        const params = this.setTickParams(delta);
+        params.wall = wall;
+        params.wall.position.y = 0;
+        this.tankmoveTickWithWallDebug(params);
+        this.updateBoundingBoxHelper();
+    }
 }
 
-export { Train };
+export { Tofu };

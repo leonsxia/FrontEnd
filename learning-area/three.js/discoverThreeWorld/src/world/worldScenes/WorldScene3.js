@@ -170,34 +170,9 @@ class WorldScene3 extends WorldScene {
         const allTargets = birdsGroup.positions.concat([{x: 0, y: 0, z: 0}]);
         const allCameraPos = birdsGroup.getBirdsCamsPositions(5);
         allCameraPos.push({x: 20, y: 15, z: 20}); // the last view camera position
-        
-        this.#loadSequence = ++this.#loadSequence % allTargets.length;
-        if (this.staticRendering) {
-            this.controls.defControl.target.copy(allTargets[this.#loadSequence]);
-            this.camera.position.copy(allCameraPos[this.#loadSequence]);
-            this.controls.defControl.update();
-        } else {
-            const tar = this.controls.defControl.target;
-            const pos = this.camera.position
-            if (this.#loadSequence === 0) { // move to first position
-                allTargets[allTargets.length - 1] = { x: tar.x, y: tar.y, z: tar.z };
-                allCameraPos[allCameraPos.length - 1] = { x: pos.x, y: pos.y, z: pos.z };
 
-                this.controls.focusNext(
-                    allTargets[allTargets.length - 1], allTargets[0],
-                    allCameraPos[allCameraPos.length - 1], allCameraPos[0]
-                );
-            } else { // move to next bird
-                allTargets[this.#loadSequence - 1] = { x: tar.x, y: tar.y, z: tar.z };
-                allCameraPos[this.#loadSequence - 1] = { x: pos.x, y: pos.y, z: pos.z };
-                this.controls.focusNext(
-                    allTargets[this.#loadSequence - 1], allTargets[this.#loadSequence],
-                    allCameraPos[this.#loadSequence - 1], allCameraPos[this.#loadSequence]
-                );
-            }
-        }
-        
-        this.controls.defControl.update();
+        const setup = { allTargets, allCameraPos };
+        this.focusNextProcess(setup);
     }
 }
 
