@@ -134,7 +134,7 @@ class Train extends Moveable2D {
         const params = this.setTickParams(delta);
         params.wall = wall;
         params.wall.position.y = 0;
-        this.tankmoveTickWithWallDebug(params);
+        this.tankmoveTickWithWall(params);
         this.tickWheels(delta, params);
         this.updateBoundingBoxHelper();
     }

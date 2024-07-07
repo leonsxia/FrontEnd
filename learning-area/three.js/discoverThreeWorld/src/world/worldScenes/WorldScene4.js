@@ -237,6 +237,7 @@ class WorldScene4 extends WorldScene {
         train.castShadow(true);
         train.receiveShadow(true);
         train.setPosition([0, 0, 0]);
+        train.setScale([.5, .5, .5]);
         train.updateBoundingBoxHelper();
 
         const tofu = new Tofu('tofu1');
@@ -245,7 +246,7 @@ class WorldScene4 extends WorldScene {
         tofu.receiveShadow(true);
         tofu.setPosition([0, 0, 3]);
         tofu.setRotation([0, Math.PI, 0]);
-        tofu.setScale([.5, .5, .5]);
+        tofu.setScale([.2, .3, .2]);
         tofu.updateBoundingBoxHelper();
 
         await Promise.all([

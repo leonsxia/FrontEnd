@@ -141,8 +141,11 @@ class WorldScene {
 
         this.loadSequence = ++this.loadSequence % allTargets.length;
 
-        if (this.player) this.player.setPosition(allPlayerPos[this.loadSequence]);
-        
+        if (this.player) {
+            this.player.setPosition(allPlayerPos[this.loadSequence]);
+            this.player.updateBoundingBoxHelper();
+        }
+
         if (this.staticRendering) {
             this.controls.defControl.target.copy(allTargets[this.loadSequence]);
             this.camera.position.copy(allCameraPos[this.loadSequence]);
