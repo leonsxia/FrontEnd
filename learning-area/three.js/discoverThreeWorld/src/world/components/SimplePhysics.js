@@ -23,8 +23,8 @@ class SimplePhysics {
 
     removeActivePlayers(...names) {
         names.forEach((name) => {
-            const find = this.players.findIndex(p => p.name === name);
-            if (find) this.activePlayers.splice(find, 1);
+            const idx = this.activePlayers.findIndex(active => active.name === name);
+            if (idx > -1) this.activePlayers.splice(find, 1);
         })
     }
 
@@ -44,12 +44,12 @@ class SimplePhysics {
         dummyObject.localToWorld(rightCorVec3);
         dummyObject.localToWorld(leftBackCorVec3);
         dummyObject.localToWorld(rightBackCorVec3);
-        if ((leftCorVec3.z <=0 || rightCorVec3.z <= 0 || leftBackCorVec3.z <= 0 || rightBackCorVec3.z <=0) 
+        if ((leftCorVec3.z <=0 || rightCorVec3.z <= 0 || leftBackCorVec3.z <= 0 || rightBackCorVec3.z <= 0) 
             && dummyObject.position.z > - box.velocity * delta) {
             const boxCenterX = dummyObject.position.x;
             const width = Math.max(Math.abs(leftCorVec3.x - rightBackCorVec3.x), Math.abs(rightCorVec3.x - leftBackCorVec3.x));
-            if ((boxCenterX + width / 2 >= - plane.width / 2 && boxCenterX < 0) ||
-                (boxCenterX - width / 2 <= plane.width / 2 && boxCenterX > 0)) {
+            if ((boxCenterX + width / 2 >= - plane.width / 2 && boxCenterX <= 0) ||
+                (boxCenterX - width / 2 <= plane.width / 2 && boxCenterX >= 0)) {
                     interesct = true;
                 }
         }

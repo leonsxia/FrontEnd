@@ -44,9 +44,11 @@ function createMeshes() {
     const width = 1.5;
     const depth = 5;
     const height = 2.25;
+    const Rl = 0.8; // big wheel radius
+    const Rs = 0.5; // small wheel radius
 
     return { cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-        boundingBox, width, depth, height
+        boundingBox, width, depth, height, Rl, Rs
      };
 }
 

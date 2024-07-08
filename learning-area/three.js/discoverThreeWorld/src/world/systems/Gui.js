@@ -112,6 +112,7 @@ class Gui {
                     case 'dropdown':
                     case 'scene-dropdown':
                     case 'control-dropdown':
+                    case 'role-dropdown':
                         folder.add(parent, property, spec.params).name(displayName).identifier = target;
                         break;
                     case 'color':
@@ -156,6 +157,12 @@ class Gui {
                         if (this.#sceneChanged) return;
                     case 'dropdown':
                         find.changeFn(val);
+                        break;
+                    case 'role-dropdown':
+                        find.changeFn(val, false);
+                        this.#guis[0].folders.find(f => f._title === 'Player Box Helper')
+                            .controllers.find(c => c._name === 'boundingBox')
+                            .setValue('hide');
                         break;
                     case 'light-num':
                     case 'angle':

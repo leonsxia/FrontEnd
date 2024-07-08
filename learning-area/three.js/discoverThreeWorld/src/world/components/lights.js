@@ -76,8 +76,8 @@ function createPointLight(lightSpecs) {
 }
 
 function createSpotLight(lightSpecs) {
-    const { detail: { color, position, target, intensity, distance = 0, angel = Math.PI / 3, penumbra = 0, decay = 2, map }} = lightSpecs;
-    const light = new SpotLight(new Color(colorStr(...color)), intensity, distance, angel, penumbra, decay);
+    const { detail: { color, position, target, intensity, distance = 0, angle = Math.PI / 3, penumbra = 0, decay = 2, map }} = lightSpecs;
+    const light = new SpotLight(new Color(colorStr(...color)), intensity, distance, angle, penumbra, decay);
     light.position.set(...position);
     light.target.position.set(...target);
     if (map) light.map = map;

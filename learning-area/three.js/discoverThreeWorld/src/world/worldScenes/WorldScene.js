@@ -12,6 +12,7 @@ const INITIAL_RIGHT_PANEL = 'Lights Control';
 const RESOLUTION_RATIO = {'0.5x': 0.5, '0.8x': 0.8, '1x': 1, '2x': 2};
 
 class WorldScene {
+    setup = {};
     name = 'default scene';
     camera = null;
     scene = null;
@@ -36,8 +37,10 @@ class WorldScene {
     obstacles = [];
     loadSequence = 0;
     player;
+    showRoleSelector = false;
 
     constructor(container, renderer, specs, eventDispatcher) {
+        this.setup = specs;
         this.name = specs.name;
         this.renderer = renderer;
         this.camera = createCamera(specs.camera);
@@ -203,6 +206,20 @@ class WorldScene {
         });
     }
 
+    unsubscribeEvents(obj, moveType) {
+        this.eventDispatcher.actions.forEach(action => {
+            const callback = obj[action];
+            if (callback) {
+                const subscriber = {
+                    subscriber: obj,
+                    scene: this.name,
+                    callback: callback
+                }
+                this.eventDispatcher.unsubscribe(moveType, action, subscriber);
+            }
+        });
+    }
+
     setupGuiConfig() {
         const rightGuiConfig = makeSceneRightGuiConfig(this.guiLights);
 
@@ -229,6 +246,28 @@ class WorldScene {
             type: 'control-dropdown',
             changeFn: this.gui.selectControl.bind(this.gui)
         }));
+        if (this.showRoleSelector) {
+            const roles = [];
+            this.players.forEach(p => roles.push(p.name));
+            this.guiLeftSpecs.details.push(makeDropdownGuiConfig({
+                folder: 'Select Role',
+                parent: 'selectRole',
+                name: 'role',
+                value: { role: this.player.name },
+                params: roles,
+                type: 'role-dropdown',
+                changeFn: this.changeCharacter.bind(this)
+            }));
+        }
+        this.guiLeftSpecs.details.push(makeDropdownGuiConfig({
+            folder: 'Player Box Helper',
+            parent: 'playerBoxHelper',
+            name: 'boundingBox',
+            value: { boundingBox: 'hide' },
+            params: ['show', 'hide'],
+            type: 'dropdown',
+            changeFn: this.showPlayerBoundingBox.bind(this)
+        }));
         
         // bind callback to light helper and shadow cam helper
         this.bindLightShadowHelperGuiCallback();
@@ -238,6 +277,38 @@ class WorldScene {
     
     changeResolution (ratio) {
         this.#resizer.changeResolution(ratio);
+    }
+
+    changeCharacter(name, showBoxHelper) {
+        // player should have boundingBox and boundingBoxHelper.
+        const find = this.players.find(p => p.name === name);
+        const oldPlayerBoxHelper = this.player ? this.scene.getObjectByName(this.player.boundingBoxHelper.name) : null;
+        if (find) {
+            if (this.player) {
+                // remove old player.
+                this.physics.removeActivePlayers(this.player.name);
+                this.scene.remove(this.player.group);
+                this.unsubscribeEvents(this.player, this.setup.moveType);
+                if (oldPlayerBoxHelper) this.scene.remove(oldPlayerBoxHelper);
+            }
+            this.player = find;
+            this.physics.addActivePlayers(name);
+            this.scene.add(this.player.group);
+            this.subscribeEvents(this.player, this.setup.moveType);
+            if (showBoxHelper) {
+                this.scene.add(this.player.boundingBoxHelper);
+            }
+        }
+    }
+
+    showPlayerBoundingBox(show) {
+        if (!this.player || !this.player.boundingBoxHelper) return;
+        const find = this.scene.getObjectByName(this.player.boundingBoxHelper.name);
+        if (show === 'show') {
+            if (!find) this.scene.add(this.player.boundingBoxHelper);
+        } else {
+            if (find) this.scene.remove(this.player.boundingBoxHelper);
+        }
     }
 
     bindLightShadowHelperGuiCallback() {

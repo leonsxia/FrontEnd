@@ -6,9 +6,12 @@ class Train extends Moveable2D {
     name = '';
     group;
     meshes;
-    w;
-    d;
-    h;
+    #w;
+    #d;
+    #h;
+    #rl;
+    #rs;
+    #rotateR = 3;
     boundingBox;
     boundingBoxHelper;
     vel;
@@ -21,18 +24,21 @@ class Train extends Moveable2D {
 
         const {
             cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-            boundingBox, width, depth, height
+            boundingBox, width, depth, height, Rl, Rs
         } = this.meshes;
         this.group.add(
             cabin, nose, chimney, smallWheelRear, smallWheelCenter, smallWheelFront, bigWheel,
             boundingBox
-        );
-        this.w = width;
-        this.d = depth;
-        this.h = height;
+        ).name = name;
+        this.#w = width;
+        this.#d = depth;
+        this.#h = height;
+        this.#rl = Rl;
+        this.#rs = Rs;
 
         this.boundingBox = new Box3();
         this.boundingBoxHelper = new Box3Helper(this.boundingBox, 0x00ff00);
+        this.boundingBoxHelper.name = `${name}-box-helper`;
     }
 
     get boundingBoxMesh() {
@@ -52,31 +58,31 @@ class Train extends Moveable2D {
     }
 
     get width() {
-        return this.w * this.group.scale.x;
+        return this.#w * this.group.scale.x;
     }
 
     get height() {
-        return this.h * this.group.scale.y;
+        return this.#h * this.group.scale.y;
     }
 
     get depth() {
-        return this.d * this.group.scale.z;
+        return this.#d * this.group.scale.z;
     }
 
     get leftCorVec3() {
-        return new Vector3(this.w / 2, 0, this.d / 2);
+        return new Vector3(this.#w / 2, 0, this.#d / 2);
     }
 
     get rightCorVec3() {
-        return new Vector3(- this.w / 2, 0, this.d / 2);
+        return new Vector3(- this.#w / 2, 0, this.#d / 2);
     }
 
     get leftBackCorVec3() {
-        return new Vector3(this.w / 2, 0, - this.d / 2);
+        return new Vector3(this.#w / 2, 0, - this.#d / 2);
     }
 
     get rightBackCorVec3() {
-        return new Vector3( - this.w / 2, 0, - this.d / 2);
+        return new Vector3( - this.#w / 2, 0, - this.#d / 2);
     }
 
     get velocity() {
@@ -107,13 +113,10 @@ class Train extends Moveable2D {
     }
 
     setTickParams(delta) {
-        const radius = 3;
-        const R = this.isAccelerating ? radius * 2.5 : radius;
-        const Rl = 0.8;
-        const Rs = 0.4;
+        const R = this.isAccelerating ? this.#rotateR * 2.5 : this.#rotateR;
         const rotateVel = this.velocity / R;
-        const smallWheelRotateVel = this.velocity / Rs;
-        const largeWheelRotateVel = this.velocity / Rl;
+        const smallWheelRotateVel = this.velocity / this.#rs;
+        const largeWheelRotateVel = this.velocity / this.#rl;
         const dist = this.velocity * delta;
         const params = {
             group: this.group, R, rotateVel, dist, delta, 

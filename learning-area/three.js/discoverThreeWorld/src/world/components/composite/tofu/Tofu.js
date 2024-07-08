@@ -6,9 +6,10 @@ class Tofu extends Moveable2D {
     name = '';
     group;
     meshes;
-    w;
-    d;
-    h;
+    #w;
+    #d;
+    #h;
+    #rotateR = 2;
     boundingBox;
     boundingBoxHelper;
     vel;
@@ -21,13 +22,14 @@ class Tofu extends Moveable2D {
         const { body, slotLeft, slotRight, boundingBox, width, depth, height } = this.meshes;
         this.group.add(
             body, slotLeft, slotRight, boundingBox
-        );
-        this.w = width;
-        this.d = depth;
-        this.h = height;
+        ).name = name;
+        this.#w = width;
+        this.#d = depth;
+        this.#h = height;
 
         this.boundingBox = new Box3();
         this.boundingBoxHelper = new Box3Helper(this.boundingBox, 0x00ff00);
+        this.boundingBoxHelper.name = `${name}-box-helper`;
     }
 
     get boundingBoxMesh() {
@@ -47,35 +49,35 @@ class Tofu extends Moveable2D {
     }
 
     get width() {
-        return this.w * this.group.scale.x;
+        return this.#w * this.group.scale.x;
     }
 
     get height() {
-        return this.h * this.group.scale.y;
+        return this.#h * this.group.scale.y;
     }
 
     get depth() {
-        return this.d * this.group.scale.z;
+        return this.#d * this.group.scale.z;
     }
 
     get leftCorVec3() {
-        return new Vector3(this.w / 2, 0, this.d / 2);
+        return new Vector3(this.#w / 2, 0, this.#d / 2);
     }
 
     get rightCorVec3() {
-        return new Vector3(- this.w / 2, 0, this.d / 2);
+        return new Vector3(- this.#w / 2, 0, this.#d / 2);
     }
 
     get leftBackCorVec3() {
-        return new Vector3(this.w / 2, 0, - this.d / 2);
+        return new Vector3(this.#w / 2, 0, - this.#d / 2);
     }
 
     get rightBackCorVec3() {
-        return new Vector3( - this.w / 2, 0, - this.d / 2);
+        return new Vector3( - this.#w / 2, 0, - this.#d / 2);
     }
 
     get velocity() {
-        return this.isAccelerating ? 10 : 4;
+        return this.isAccelerating ? 13.89 : 6.94;
     }
 
     updateBoundingBoxHelper() {
@@ -118,9 +120,7 @@ class Tofu extends Moveable2D {
     }
 
     setTickParams(delta) {
-        const radius = 2;
-        const R = this.isAccelerating ? radius * 2.5 : radius;
-        // const vel = this.isAccelerating ? 5.1 : 2.55; // 50km/h - 20km/s
+        const R = this.isAccelerating ? this.#rotateR * 2.5 : this.#rotateR;
         const rotateVel = this.velocity / R;
         const dist = this.velocity * delta;
         const params = {

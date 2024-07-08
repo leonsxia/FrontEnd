@@ -71,7 +71,7 @@ class EventDispatcher {
     }
 
     findSubscriber(subscriber, subscribers) {
-        return subscribers.findIndex(s => s.subscriber === subscriber);
+        return subscribers.findIndex(s => s.subscriber === subscriber.subscriber);
     }
 }
 

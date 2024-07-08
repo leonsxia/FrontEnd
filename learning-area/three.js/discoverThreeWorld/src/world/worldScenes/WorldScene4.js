@@ -93,7 +93,8 @@ const spotLightSpecsArr = [
             intensity: 26,
             distance: 45,    // 0 infinite far
             decay: 0.33,
-            penumbra: 0.35
+            penumbra: 0.35,
+            angle: 72 / 360 * Math.PI
         },
         debug: true,
         shadow: true,
@@ -141,12 +142,6 @@ class WorldScene4 extends WorldScene {
         this.shadowLightObjects = setupShadowLight.call(this,
             this.scene, ...basicLightSpecsArr, ...pointLightSpecsArr, ...spotLightSpecsArr
         );
-
-        // Gui setup
-        if (worldSceneSpecs.enableGui) {
-            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr, spotLightSpecsArr };
-            this.setupGuiConfig();
-        }
         
         return {
             name: this.name,
@@ -233,7 +228,7 @@ class WorldScene4 extends WorldScene {
         box.receiveShadow(true);
 
         const train = new Train('red train 2');
-        this.subscribeEvents(train, worldSceneSpecs.moveType);
+        // this.subscribeEvents(train, worldSceneSpecs.moveType);
         train.castShadow(true);
         train.receiveShadow(true);
         train.setPosition([0, 0, 0]);
@@ -241,7 +236,7 @@ class WorldScene4 extends WorldScene {
         train.updateBoundingBoxHelper();
 
         const tofu = new Tofu('tofu1');
-        this.subscribeEvents(tofu, worldSceneSpecs.moveType);
+        // this.subscribeEvents(tofu, worldSceneSpecs.moveType);
         tofu.castShadow(true);
         tofu.receiveShadow(true);
         tofu.setPosition([0, 0, 3]);
@@ -256,23 +251,27 @@ class WorldScene4 extends WorldScene {
 
         const walls = this.createWalls().concat(this.createWalls2());
         this.players.push(tofu);
-        // this.players.push(train);
-        this.player = tofu;
-        // this.player = train;
+        this.players.push(train);
         this.walls = walls;
         this.floors.push(ground);
         this.physics = new SimplePhysics(this.players, this.floors, this.walls, this.obstacles);
-        this.physics.addActivePlayers('tofu1');
-        // this.physics.addActivePlayers('red train 2');
 
         this.loop.updatables.push(earth, box, this.physics);
-        this.scene.add(ground.mesh, ground.boundingBoxHelper, ceiling.mesh, 
-            tofu.group, tofu.boundingBoxHelper
-            // train.group, train.boundingBoxHelper
+        this.scene.add(ground.mesh, ground.boundingBoxHelper, ceiling.mesh
         );
+
+        this.changeCharacter('red train 2', false);
+
         walls.forEach(w => {
             this.scene.add(w.mesh, w.line);
         });
+
+        this.showRoleSelector = true;
+        // Gui setup
+        if (worldSceneSpecs.enableGui) {
+            this.guiLights = { basicLightSpecsArr, pointLightSpecsArr, spotLightSpecsArr };
+            this.setupGuiConfig();
+        }
 
         this.initContainer();
         this.#loaded = true;
