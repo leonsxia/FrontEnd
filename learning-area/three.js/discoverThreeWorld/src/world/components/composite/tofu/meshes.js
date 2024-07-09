@@ -1,4 +1,4 @@
-import { Mesh } from 'three';
+import { Mesh, LineSegments } from 'three';
 
 import { createGeometries } from './geometires';
 import { createMaterials } from './materials';
@@ -19,10 +19,10 @@ function createMeshes() {
     slotRight.name = 'slotRight'
     slotRight.position.set(-1, 3, 1);
 
-    const boundingBox = new Mesh(geometires.boundingBox, materials.boundingBox);
+    const boundingBox = new LineSegments(geometires.boundingBoxEdges, materials.boundingBox);
     boundingBox.name = 'boundingBox';
     boundingBox.position.set(0, 3, 0);
-    boundingBox.visible = false;
+    boundingBox.visible = true;
     boundingBox.geometry.computeBoundingBox();
 
     const width = 3;

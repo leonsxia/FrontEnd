@@ -1,4 +1,4 @@
-import { BoxGeometry, CylinderGeometry } from 'three';
+import { BoxGeometry, CylinderGeometry, EdgesGeometry } from 'three';
 
 function createGeometries() {
     const cabin = new BoxGeometry(2, 2.25, 1.5);
@@ -6,8 +6,9 @@ function createGeometries() {
     const wheel = new CylinderGeometry(0.4, 0.4, 1.75, 8);
     const chimney = new CylinderGeometry(0.3, 0.1, 0.5, 8);
     const boundingBox = new BoxGeometry(2, 2.25, 5);
+    const boundgingBoxEdges = new EdgesGeometry(boundingBox);
 
-    return { cabin, nose, wheel, chimney, boundingBox };
+    return { cabin, nose, wheel, chimney, boundingBox, boundgingBoxEdges };
 }
 
 export { createGeometries };

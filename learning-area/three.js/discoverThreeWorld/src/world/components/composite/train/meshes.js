@@ -1,4 +1,4 @@
-import { Mesh } from 'three';
+import { Mesh, LineSegments } from 'three';
 
 import { createGeometries } from './geometires';
 import { createMaterials } from './materials';
@@ -35,10 +35,10 @@ function createMeshes() {
     bigWheel.position.set(0, 0.8, -1.5);
     bigWheel.scale.set(2, 1.25, 2);
 
-    const boundingBox = new Mesh(geometires.boundingBox, materials.boundingBox);
+    const boundingBox = new LineSegments(geometires.boundgingBoxEdges, materials.boundingBox);
     boundingBox.name = 'boundingBox';
     boundingBox.position.set(0, 1.3, 0);
-    boundingBox.visible = false;
+    boundingBox.visible = true;
     boundingBox.geometry.computeBoundingBox();
 
     const width = 1.5;

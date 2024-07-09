@@ -1,9 +1,8 @@
-import { MeshPhysicalMaterial } from 'three';
+import { MeshPhysicalMaterial, LineBasicMaterial } from 'three';
 
 function createMaterials() {
-    const boundingBox = new MeshPhysicalMaterial({
-        color: '#dddddd',
-        flatShading: true
+    const boundingBox = new LineBasicMaterial({
+        color: '#00ff00'
     });
 
     const body = new MeshPhysicalMaterial({

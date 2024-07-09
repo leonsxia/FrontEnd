@@ -77,7 +77,7 @@ class Tofu extends Moveable2D {
     }
 
     get velocity() {
-        return this.isAccelerating ? 13.89 : 6.94;
+        return this.isAccelerating ? 13.89 : 6;
     }
 
     updateBoundingBoxHelper() {
@@ -120,7 +120,7 @@ class Tofu extends Moveable2D {
     }
 
     setTickParams(delta) {
-        const R = this.isAccelerating ? this.#rotateR * 2.5 : this.#rotateR;
+        const R = this.isAccelerating ? this.#rotateR * 2 : this.#rotateR;
         const rotateVel = this.velocity / R;
         const dist = this.velocity * delta;
         const params = {
