@@ -6,9 +6,9 @@ function createGeometries() {
     const wheel = new CylinderGeometry(0.4, 0.4, 1.75, 8);
     const chimney = new CylinderGeometry(0.3, 0.1, 0.5, 8);
     const boundingBox = new BoxGeometry(2, 2.25, 5);
-    const boundgingBoxEdges = new EdgesGeometry(boundingBox);
+    const boundingBoxEdges = new EdgesGeometry(boundingBox);
 
-    return { cabin, nose, wheel, chimney, boundingBox, boundgingBoxEdges };
+    return { cabin, nose, wheel, chimney, boundingBox, boundingBoxEdges };
 }
 
 export { createGeometries };

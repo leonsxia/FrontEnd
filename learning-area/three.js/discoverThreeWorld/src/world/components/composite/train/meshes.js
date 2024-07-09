@@ -35,10 +35,17 @@ function createMeshes() {
     bigWheel.position.set(0, 0.8, -1.5);
     bigWheel.scale.set(2, 1.25, 2);
 
-    const boundingBox = new LineSegments(geometires.boundgingBoxEdges, materials.boundingBox);
+    const boundingBoxWire = new LineSegments(geometires.boundingBoxEdges, materials.boundingBoxWire);
+    boundingBoxWire.name = 'boundingBoxWire';
+    boundingBoxWire.position.set(0, 1.3, 0);
+    boundingBoxWire.visible = true;
+    boundingBoxWire.geometry.computeBoundingBox();
+
+    const boundingBox = new Mesh(geometires.boundingBox, materials.boundingBox);
     boundingBox.name = 'boundingBox';
     boundingBox.position.set(0, 1.3, 0);
-    boundingBox.visible = true;
+    boundingBox.visible = false;
+    boundingBox.layers.enable(1);
     boundingBox.geometry.computeBoundingBox();
 
     const width = 1.5;
@@ -48,7 +55,7 @@ function createMeshes() {
     const Rs = 0.5; // small wheel radius
 
     return { cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-        boundingBox, width, depth, height, Rl, Rs
+        boundingBox, boundingBoxWire, width, depth, height, Rl, Rs
      };
 }
 

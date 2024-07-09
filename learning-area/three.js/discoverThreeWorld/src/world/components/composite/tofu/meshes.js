@@ -19,17 +19,24 @@ function createMeshes() {
     slotRight.name = 'slotRight'
     slotRight.position.set(-1, 3, 1);
 
-    const boundingBox = new LineSegments(geometires.boundingBoxEdges, materials.boundingBox);
+    const boundingBoxWire = new LineSegments(geometires.boundingBoxEdges, materials.boundingBoxWire);
+    boundingBoxWire.name = 'boundingBoxWire';
+    boundingBoxWire.position.set(0, 3, 0);
+    boundingBoxWire.visible = true;
+    boundingBoxWire.geometry.computeBoundingBox();
+
+    const boundingBox = new Mesh(geometires.boundingBox, materials.boundingBox);
     boundingBox.name = 'boundingBox';
     boundingBox.position.set(0, 3, 0);
-    boundingBox.visible = true;
+    boundingBox.visible = false;
+    boundingBox.layers.enable(1);
     boundingBox.geometry.computeBoundingBox();
 
     const width = 3;
     const depth = 3;
     const height = 6;
 
-    return { body, slotLeft, slotRight, boundingBox, width, depth, height };
+    return { body, slotLeft, slotRight, boundingBox, boundingBoxWire, width, depth, height };
 }
 
 export { createMeshes };

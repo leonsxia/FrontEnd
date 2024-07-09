@@ -24,11 +24,11 @@ class Train extends Moveable2D {
 
         const {
             cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-            boundingBox, width, depth, height, Rl, Rs
+            boundingBox, boundingBoxWire, width, depth, height, Rl, Rs
         } = this.meshes;
         this.group.add(
             cabin, nose, chimney, smallWheelRear, smallWheelCenter, smallWheelFront, bigWheel,
-            boundingBox
+            boundingBox, boundingBoxWire
         ).name = name;
         this.#w = width;
         this.#d = depth;
@@ -39,6 +39,10 @@ class Train extends Moveable2D {
         this.boundingBox = new Box3();
         this.boundingBoxHelper = new Box3Helper(this.boundingBox, 0x00ff00);
         this.boundingBoxHelper.name = `${name}-box-helper`;
+    }
+
+    get boundingBoxWireMesh() {
+        return this.group.getObjectByName('boundingBoxWire');
     }
 
     get boundingBoxMesh() {
@@ -98,6 +102,7 @@ class Train extends Moveable2D {
 
     setBoundingBoxHelperColor(color) {
         this.boundingBoxHelper.material.color.setHex(color);
+        this.boundingBoxWireMesh.material.color.setHex(color);
     }
 
     setPosition(pos) {

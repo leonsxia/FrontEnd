@@ -19,17 +19,22 @@ class Tofu extends Moveable2D {
         this.name = name;
         this.group = new Group();
         this.meshes = createMeshes();
-        const { body, slotLeft, slotRight, boundingBox, width, depth, height } = this.meshes;
+        const { body, slotLeft, slotRight, boundingBox, boundingBoxWire, width, depth, height } = this.meshes;
         this.group.add(
-            body, slotLeft, slotRight, boundingBox
+            body, slotLeft, slotRight, 
+            boundingBoxWire, 
+            boundingBox
         ).name = name;
         this.#w = width;
         this.#d = depth;
         this.#h = height;
-
         this.boundingBox = new Box3();
         this.boundingBoxHelper = new Box3Helper(this.boundingBox, 0x00ff00);
         this.boundingBoxHelper.name = `${name}-box-helper`;
+    }
+
+    get boundingBoxWireMesh() {
+        return this.group.getObjectByName('boundingBoxWire');
     }
 
     get boundingBoxMesh() {
@@ -77,7 +82,7 @@ class Tofu extends Moveable2D {
     }
 
     get velocity() {
-        return this.isAccelerating ? 13.89 : 6;
+        return this.isAccelerating ? 13.89 : 3;
     }
 
     updateBoundingBoxHelper() {
@@ -89,6 +94,7 @@ class Tofu extends Moveable2D {
 
     setBoundingBoxHelperColor(color) {
         this.boundingBoxHelper.material.color.setHex(color);
+        this.boundingBoxWireMesh.material.color.setHex(color);
     }
 
     setPosition(pos) {
