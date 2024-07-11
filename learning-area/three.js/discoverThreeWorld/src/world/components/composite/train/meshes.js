@@ -45,17 +45,39 @@ function createMeshes() {
     boundingBox.name = 'boundingBox';
     boundingBox.position.set(0, 1.3, 0);
     boundingBox.visible = false;
-    boundingBox.layers.enable(1);
     boundingBox.geometry.computeBoundingBox();
 
-    const width = 1.5;
+    const width = 2;
     const depth = 5;
     const height = 2.25;
     const Rl = 0.8; // big wheel radius
-    const Rs = 0.5; // small wheel radius
+    const Rs = 0.4; // small wheel radius
+
+    const BBFDepthOffset = depth / 2 - geometires.BBFThickness / 2;
+    const BBFWidthOffset = width / 2 - geometires.BBFThickness / 2;
+    const frontBoundingFace = new Mesh(geometires.boundingBoxFace, materials.boudingBoxFace);
+    frontBoundingFace.name = 'frontFace';
+    frontBoundingFace.position.set(0, 1.3, BBFDepthOffset);
+    frontBoundingFace.visible = true;
+    frontBoundingFace.layers.enable(1);
+
+    const backBoundingFace = frontBoundingFace.clone();
+    backBoundingFace.name = 'backFace';
+    backBoundingFace.position.set(0, 1.3, - BBFDepthOffset);
+
+    const leftBoundingFace = frontBoundingFace.clone();
+    leftBoundingFace.name = 'leftFace';
+    leftBoundingFace.position.set(BBFWidthOffset, 1.3, 0);
+    leftBoundingFace.scale.x = 2.67;
+    leftBoundingFace.rotation.y += Math.PI / 2;
+
+    const rightBoundingFace = leftBoundingFace.clone();
+    rightBoundingFace.name = 'rightFace';
+    rightBoundingFace.position.set(- BBFWidthOffset, 1.3, 0);
 
     return { cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-        boundingBox, boundingBoxWire, width, depth, height, Rl, Rs
+        boundingBox, boundingBoxWire, frontBoundingFace, backBoundingFace, leftBoundingFace, rightBoundingFace,
+        width, depth, height, Rl, Rs
      };
 }
 

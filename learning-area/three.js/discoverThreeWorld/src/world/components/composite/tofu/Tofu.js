@@ -19,11 +19,15 @@ class Tofu extends Moveable2D {
         this.name = name;
         this.group = new Group();
         this.meshes = createMeshes();
-        const { body, slotLeft, slotRight, boundingBox, boundingBoxWire, width, depth, height } = this.meshes;
+        const { 
+            body, slotLeft, slotRight, 
+            boundingBox, boundingBoxWire, 
+            frontBoundingFace, backBoundingFace, leftBoundingFace, rightBoundingFace,
+            width, depth, height } = this.meshes;
         this.group.add(
             body, slotLeft, slotRight, 
-            boundingBoxWire, 
-            boundingBox
+            boundingBox, boundingBoxWire, 
+            frontBoundingFace, backBoundingFace, leftBoundingFace, rightBoundingFace
         ).name = name;
         this.#w = width;
         this.#d = depth;
@@ -82,7 +86,15 @@ class Tofu extends Moveable2D {
     }
 
     get velocity() {
-        return this.isAccelerating ? 13.89 : 3;
+        return this.isAccelerating ? 10 : 3;
+    }
+
+    get recoverCoefficient() {
+        return this.isAccelerating ? 0.04 : 0.02;
+    }
+    
+    get backwardCoefficient() {
+        return this.isAccelerating ? 0.01 : 0.005;
     }
 
     updateBoundingBoxHelper() {
@@ -145,7 +157,9 @@ class Tofu extends Moveable2D {
     tickWithWall(delta, wall) {
         const params = this.setTickParams(delta);
         params.wall = wall;
-        params.wall.position.y = 0;
+        params.wallMesh = wall.mesh.clone();
+        params.wallMesh.position.y = 0;
+        params.wallMesh.rotationY = wall.mesh.rotationY;
         this.tankmoveTickWithWall(params);
         this.updateBoundingBoxHelper();
     }

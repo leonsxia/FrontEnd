@@ -35,12 +35,20 @@ class Moveable2D {
         console.log(`[moveable2D]:accelerate ${this.#accelerate}`);
     }
 
+    get stopped() {
+        return !this.#movingLeft && !this.#movingRight && !this.#movingForward && !this.#movingBackward;
+    }
+
     get isForward() {
         return this.isMovingForward || this.isMovingForwardLeft || this.isMovingForwardRight;
     }
 
     get isBackward() {
         return this.isMovingBackward || this.isMovingBackwardLeft || this.isMovingBackwardRight;
+    }
+
+    get isRotating() {
+        return this.isTurnClockwise || this.isTurnCounterClockwise;
     }
 
     get isTurnCounterClockwise() {
@@ -122,12 +130,12 @@ class Moveable2D {
     }
 
     tankmoveTickWithWall(params) {
-        const { group, R, rotateVel, dist, delta, wall } = params;
+        const { group, R, rotateVel, dist, delta, wall, wallMesh } = params;
 
         // set dummy object related to zero position.
         const dummyObject = new Object3D();
-        dummyObject.position.copy(wall.worldToLocal(group.position.clone()));
-        dummyObject.rotation.y = group.rotation.y - wall.rotationY;
+        dummyObject.position.copy(wallMesh.worldToLocal(group.position.clone()));
+        dummyObject.rotation.y = group.rotation.y - wallMesh.rotationY;
         dummyObject.scale.copy(group.scale);
 
         let deltaVec3, deltaX, deltaZ;
@@ -136,54 +144,92 @@ class Moveable2D {
         const leftBackCorVec3 = this.leftBackCorVec3;
         const rightBackCorVec3 = this.rightBackCorVec3;
         const boundries = [leftCorVec3, rightCorVec3, leftBackCorVec3, rightBackCorVec3];
+
+        const { borderReach, leftCorIntersectFace, rightCorIntersectFace } = wall.checkResult;
+
+        const recoverCoefficient = this.recoverCoefficient;
+        const backwardCoefficient = this.backwardCoefficient;
+
         if (this.isMovingForward) {
             const deltaVec3 = new Vector3(0, 0, dist);
             const offsetVec3 = dummyObject.localToWorld(deltaVec3);
             this.localToWorldBatch(dummyObject, boundries);
-            if (leftCorVec3.z <= 0) {
-                const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftCorVec3.z);
-                dummyObject.position.copy(dirVec3);
-            } else if (rightCorVec3.z <= 0) {
-                const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightCorVec3.z);
-                dummyObject.position.copy(dirVec3);
-            } else {
+            if (!borderReach) {
+                if (leftCorVec3.z <= 0) {
+                    const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftCorVec3.z);
+                    dummyObject.position.copy(dirVec3);
+                } else if (rightCorVec3.z <= 0) {
+                    const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightCorVec3.z);
+                    dummyObject.position.copy(dirVec3);
+                } else {
+                    dummyObject.position.copy(offsetVec3);
+                }
+            } else if (leftCorIntersectFace !== 'frontFace' && rightCorIntersectFace !== 'frontFace') {
                 dummyObject.position.copy(offsetVec3);
+                if (leftCorIntersectFace) { // when left or right faces interset the cornor
+                    dummyObject.position.x += recoverCoefficient;
+                } else {
+                    dummyObject.position.x -= recoverCoefficient;
+                }
+            } else if (leftCorIntersectFace === 'frontFace' || rightCorIntersectFace === 'frontFace') {
+                dummyObject.position.copy(dummyObject.localToWorld(new Vector3(0, 0, - backwardCoefficient)));
             }
         } else if (this.isMovingBackward) {
             const deltaVec3 = new Vector3(0, 0, - dist);
             const offsetVec3 = dummyObject.localToWorld(deltaVec3);
             this.localToWorldBatch(dummyObject, boundries);
-            if (rightBackCorVec3.z <= 0) {
-                const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightBackCorVec3.z);
-                dummyObject.position.copy(dirVec3);
-            } else if (leftBackCorVec3.z <= 0) {
-                const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftBackCorVec3.z);
-                dummyObject.position.copy(dirVec3);
-            } else {
+            if (!borderReach) {
+                if (rightBackCorVec3.z <= 0) {
+                    const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightBackCorVec3.z);
+                    dummyObject.position.copy(dirVec3);
+                } else if (leftBackCorVec3.z <= 0) {
+                    const dirVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftBackCorVec3.z);
+                    dummyObject.position.copy(dirVec3);
+                } else {
+                    dummyObject.position.copy(offsetVec3);
+                }
+            } else if (leftCorIntersectFace !== 'backFace' && rightCorIntersectFace !== 'backFace') {
                 dummyObject.position.copy(offsetVec3);
+                if (leftCorIntersectFace) { // when left or right faces interset the cornor
+                    dummyObject.position.x += recoverCoefficient;
+                } else {
+                    dummyObject.position.x -= recoverCoefficient;
+                }
+            } else if (leftCorIntersectFace === 'backFace' || rightCorIntersectFace === 'backFace') {
+                dummyObject.position.copy(dummyObject.localToWorld(new Vector3(0, 0, - backwardCoefficient)));
             }
         } else if (this.isTurnClockwise) {
             this.localToWorldBatch(dummyObject, boundries);
-            if (leftCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - leftCorVec3.z;
-            } else if (rightCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - rightCorVec3.z;
-            } else if (leftBackCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - leftBackCorVec3.z;
-            } else if (rightBackCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - rightBackCorVec3.z;
+            if (!borderReach) {
+                if (leftCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - leftCorVec3.z;
+                } else if (rightCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - rightCorVec3.z;
+                } else if (leftBackCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - leftBackCorVec3.z;
+                } else if (rightBackCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - rightBackCorVec3.z;
+                }
+            } else {
+                if (rightCorIntersectFace) dummyObject.position.x -= recoverCoefficient;
+                else dummyObject.position.x += recoverCoefficient;
             }
             dummyObject.rotation.y -= rotateVel * delta;
-        } else if (this.isTurnCounterClockwise) {
+        } else if (this.isTurnCounterClockwise) { 
             this.localToWorldBatch(dummyObject, boundries);
-            if (rightCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - rightCorVec3.z;
-            } else if (leftCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - leftCorVec3.z;
-            } else if (rightBackCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - rightBackCorVec3.z;
-            } else if (leftBackCorVec3.z <= 0) {
-                dummyObject.position.z = dummyObject.position.z - leftBackCorVec3.z;
+            if (!borderReach) {
+                if (rightCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - rightCorVec3.z;
+                } else if (leftCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - leftCorVec3.z;
+                } else if (rightBackCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - rightBackCorVec3.z;
+                } else if (leftBackCorVec3.z <= 0) {
+                    dummyObject.position.z = dummyObject.position.z - leftBackCorVec3.z;
+                }
+            } else {
+                if (leftCorIntersectFace) dummyObject.position.x += recoverCoefficient;
+                else dummyObject.position.x -= recoverCoefficient;
             }
             dummyObject.rotation.y += rotateVel * delta;
         } else {
@@ -192,45 +238,59 @@ class Moveable2D {
             if (this.isMovingForwardLeft || this.isMovingBackwardLeft) {
                 deltaVec3 = this.isMovingForwardLeft ? new Vector3(deltaX, 0, deltaZ) : new Vector3(deltaX, 0, - deltaZ);
                 const offsetVec3 = dummyObject.localToWorld(deltaVec3);
-                dummyObject.position.copy(offsetVec3);
+                // dummyObject.position.copy(offsetVec3);
                 dummyObject.rotation.y += this.isMovingForwardLeft ? rotateVel * delta : - rotateVel * delta;
                 this.localToWorldBatch(dummyObject, boundries);
-                if (rightCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightCorVec3.z);
-                    dummyObject.position.copy(newVec3);
-                } else if (leftCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftCorVec3.z);
-                    dummyObject.position.copy(newVec3);
-                } else if (rightBackCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightBackCorVec3.z);
-                    dummyObject.position.copy(newVec3);
-                } else if (leftBackCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftBackCorVec3.z);
-                    dummyObject.position.copy(newVec3);
+                if (!borderReach) {
+                    if (rightCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else if (leftCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else if (rightBackCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightBackCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else if (leftBackCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftBackCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else {
+                        dummyObject.position.copy(offsetVec3);
+                    }
+                } else {
+                    if (leftCorIntersectFace) dummyObject.position.x += recoverCoefficient;
+                    else dummyObject.position.x -= recoverCoefficient;
                 }
             } else if (this.isMovingForwardRight || this.isMovingBackwardRight) {
                 deltaVec3 = this.isMovingForwardRight ? new Vector3(- deltaX, 0, deltaZ) : new Vector3(- deltaX, 0, - deltaZ);
                 const offsetVec3 = dummyObject.localToWorld(deltaVec3);
-                dummyObject.position.copy(offsetVec3);
+                // dummyObject.position.copy(offsetVec3);
                 dummyObject.rotation.y += this.isMovingForwardRight ? - rotateVel * delta : rotateVel * delta;
                 this.localToWorldBatch(dummyObject, boundries);
-                if (leftCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftCorVec3.z);
-                    dummyObject.position.copy(newVec3);
-                } else if (rightCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightCorVec3.z);
-                    dummyObject.position.copy(newVec3);
-                } else if (leftBackCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftBackCorVec3.z);
-                    dummyObject.position.copy(newVec3);
-                } else if (rightBackCorVec3.z <= 0) {
-                    const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightBackCorVec3.z);
-                    dummyObject.position.copy(newVec3);
+                if (!borderReach) {
+                    if (leftCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else if (rightCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else if (leftBackCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - leftBackCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else if (rightBackCorVec3.z <= 0) {
+                        const newVec3 = new Vector3(offsetVec3.x, 0, dummyObject.position.z - rightBackCorVec3.z);
+                        dummyObject.position.copy(newVec3);
+                    } else {
+                        dummyObject.position.copy(offsetVec3);
+                    }
+                } else {
+                    if (leftCorIntersectFace) dummyObject.position.x += recoverCoefficient;
+                    else dummyObject.position.x -= recoverCoefficient;
                 }
             }
         }
-        group.position.copy(wall.localToWorld(dummyObject.position.clone()));
-        group.rotation.y = dummyObject.rotation.y + wall.rotationY;
+        group.position.copy(wallMesh.localToWorld(dummyObject.position.clone()));
+        group.rotation.y = dummyObject.rotation.y + wallMesh.rotationY;
     }
 }
 

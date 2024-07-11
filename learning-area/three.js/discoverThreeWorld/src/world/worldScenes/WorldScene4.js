@@ -4,7 +4,7 @@ import { Train, Tofu, Sphere, BoxCube, Plane } from '../components/Models.js';
 import { setupShadowLight } from '../components/shadowMaker.js';
 import { SimplePhysics } from '../components/SimplePhysics.js';
 import { WorldScene } from './WorldScene.js';
-import { Vector3 } from 'three';
+import { ArrowHelper } from 'three';
 
 const sceneName = 'Simple Physics';
 const worldSceneSpecs = {
@@ -241,7 +241,7 @@ class WorldScene4 extends WorldScene {
         tofu.receiveShadow(true);
         tofu.setPosition([0, 0, 3]);
         tofu.setRotation([0, Math.PI, 0]);
-        tofu.setScale([.2, .3, .2]);
+        tofu.setScale([.5, .3, .5]);
         tofu.updateBoundingBoxHelper();
 
         await Promise.all([
@@ -249,7 +249,7 @@ class WorldScene4 extends WorldScene {
             box.init(boxSpecs)
         ]);
 
-        const walls = this.createWalls().concat(this.createWalls2());
+        const walls = this.createWalls().concat(this.createWalls2()).concat(this.createInsideWalls2());
         this.players.push(tofu);
         this.players.push(train);
         this.walls = walls;
@@ -264,6 +264,8 @@ class WorldScene4 extends WorldScene {
 
         walls.forEach(w => {
             this.scene.add(w.mesh, w.line);
+            this.scene.add(new ArrowHelper(w.leftRay.ray.direction, w.leftRay.ray.origin, w.height, 0x00ff00) );
+            this.scene.add(new ArrowHelper(w.rightRay.ray.direction, w.rightRay.ray.origin, w.height, 0xff0000) );
         });
 
         this.showRoleSelector = true;
@@ -359,81 +361,175 @@ class WorldScene4 extends WorldScene {
     }
 
     createWalls2() {
-        // wall
         const wallSpecs = {
             width: 10,
-            height: 5,
+            height: 2.5,
             color: 0xcccccc,
-            name: 'wall5'
         };
+        const posY = wallSpecs.height / 2 - .1;
+        // wall
         const wall = new Plane(wallSpecs);
+        wall.name = 'wall5';
         wall.receiveShadow(true);
-        // wall.setDoubleSide();
-        // wall.setDoubleShadowSide();
         wall.castShadow(true);
-        wall.setPosition([0, 0, - 5]);
+        wall.setPosition([0, posY, - 14]);
         wall.setRotationY(0);
         wall.updateBoundingBoxHelper();
 
-        const wall2Specs = {
-            width: 10,
-            height: 5,
-            color: 0xcccccc,
-            name: 'wall6'
-        };
-        const wall2 = new Plane(wall2Specs);
+        const wall2 = new Plane(wallSpecs);
+        wall2.name = 'wall6'
         wall2.receiveShadow(true);
-        // wall2.setDoubleSide();
-        // wall2.setDoubleShadowSide();
         wall2.castShadow(true);
-        wall2.setPosition([- 5, 0, 0]);
+        wall2.setPosition([- 5, posY, - 9]);
         wall2.setRotationY(Math.PI / 2);
         wall2.updateBoundingBoxHelper();
 
-        const wall3Specs = {
-            width: 10,
-            height: 5,
-            color: 0xcccccc,
-            name: 'wall7'
-        };
-        const wall3 = new Plane(wall3Specs);
+        const wall3 = new Plane(wallSpecs);
+        wall3.name = 'wall7'
         wall3.receiveShadow(true);
-        // wall3.setDoubleSide();
-        // wall3.setDoubleShadowSide();
         wall3.castShadow(true);
-        wall3.setPosition([0, 0, 5]);
+        wall3.setPosition([0, posY, - 4]);
         wall3.setRotationY(Math.PI);
         wall3.updateBoundingBoxHelper();
 
-        const wall4Specs = {
-            width: 10,
-            height: 5,
-            color: 0xcccccc,
-            name: 'wall8'
-        };
-        const wall4 = new Plane(wall4Specs);
+        const wall4 = new Plane(wallSpecs);
+        wall4.name = 'wall8'
         wall4.receiveShadow(true);
-        // wall4.setDoubleSide();
-        // wall4.setDoubleShadowSide();
         wall4.castShadow(true);
-        wall4.setPosition([5, 0, 0]);
+        wall4.setPosition([5, posY, - 9]);
         wall4.setRotationY(- Math.PI / 2);
         wall4.updateBoundingBoxHelper();
 
         return [wall, wall2, wall3, wall4];
     }
 
+    createInsideWalls() {
+        const wallSpecs = {
+            width: 1,
+            height: 2.5,
+            color: 0xcccccc
+        }
+        const offset = Math.sqrt(.5);
+        const posY = wallSpecs.height / 2 - .1;
+        const wall = new Plane(wallSpecs);
+        wall.name = 'wall9';
+        wall.receiveShadow(true);
+        wall.castShadow(true);
+        wall.setPosition([0, posY, -5]);
+        wall.setRotationY(0);
+        wall.updateBoundingBoxHelper();
+
+        const wall2 = new Plane(wallSpecs);
+        wall2.name = 'wall10';
+        wall2.receiveShadow(true);
+        wall2.castShadow(true);
+        wall2.setPosition([- .5 - offset / 2, posY, - 5 - offset / 2]);
+        wall2.setRotationY(- Math.PI / 4);
+        wall2.updateBoundingBoxHelper();
+
+        const wall3 = new Plane(wallSpecs);
+        wall3.name = 'wall11';
+        wall3.receiveShadow(true);
+        wall3.castShadow(true);
+        wall3.setPosition([- .5 - offset, posY, - 5.5 - offset]);
+        wall3.setRotationY(- Math.PI / 2);
+        wall3.updateBoundingBoxHelper();
+
+        const wall4 = new Plane(wallSpecs);
+        wall4.name = 'wall12';
+        wall4.receiveShadow(true);
+        wall4.castShadow(true);
+        wall4.setPosition([- .5 - offset / 2, posY, - 6 - 3 * offset / 2]);
+        wall4.setRotationY(- 3 * Math.PI / 4);
+        wall4.updateBoundingBoxHelper();
+
+        const wall5 = new Plane(wallSpecs);
+        wall5.name = 'wall13'
+        wall5.receiveShadow(true);;
+        wall5.castShadow(true);
+        wall5.setPosition([0, posY, - 6 - 2 * offset]);
+        wall5.setRotationY(Math.PI);
+        wall5.updateBoundingBoxHelper();
+
+        const wall6 = new Plane(wallSpecs);
+        wall6.name = 'wall14'
+        wall6.receiveShadow(true);;
+        wall6.castShadow(true);
+        wall6.setPosition([.5 + offset / 2, posY, - 6 - 3 * offset / 2]);
+        wall6.setRotationY(3 * Math.PI / 4);
+        wall6.updateBoundingBoxHelper();
+
+        const wall7 = new Plane(wallSpecs);
+        wall7.name = 'wall15';
+        wall7.receiveShadow(true);
+        wall7.castShadow(true);
+        wall7.setPosition([.5 + offset, posY, - 5.5 - offset]);
+        wall7.setRotationY(Math.PI / 2);
+        wall7.updateBoundingBoxHelper();
+
+        const wall8 = new Plane(wallSpecs);
+        wall8.name = 'wall16'
+        wall8.receiveShadow(true);;
+        wall8.castShadow(true);
+        wall8.setPosition([.5 + offset / 2, posY, - 5 - offset / 2]);
+        wall8.setRotationY(Math.PI / 4);
+        wall8.updateBoundingBoxHelper();
+
+        return [
+            wall, wall2, wall3, wall4, 
+            wall5, wall6, wall7, wall8
+        ];
+    }
+
+    createInsideWalls2() {
+        const wallSpecs = {
+            width: 1,
+            height: 2.5,
+            color: 0xcccccc
+        }
+        const posY = wallSpecs.height / 2 - .1;
+
+        const wall = new Plane(wallSpecs);
+        wall.name = 'wall17';
+        wall.receiveShadow(true);
+        wall.castShadow(true);
+        wall.setPosition([- 3, posY, - 4.5]);
+        wall.setRotationY(- Math.PI / 2);
+        wall.updateBoundingBoxHelper();
+
+        const wall2 = new Plane(wallSpecs);
+        wall2.name = 'wall18';
+        wall2.receiveShadow(true);
+        wall2.castShadow(true);
+        wall2.setPosition([- 2.5, posY, - 5]);
+        wall2.setRotationY(Math.PI);
+        wall2.updateBoundingBoxHelper();
+
+        const wall3 = new Plane(wallSpecs);
+        wall3.name = 'wall19';
+        wall3.receiveShadow(true);
+        wall3.castShadow(true);
+        wall3.setPosition([- 2, posY, - 4.5]);
+        wall3.setRotationY(Math.PI / 2);
+        wall3.updateBoundingBoxHelper();
+
+        return [wall, wall2, wall3];
+    }
+
     focusNext() {
         const allTargets = [
             { x: 0, y: 0, z: 0 },
+            { x: 0, y: 0, z: - 9},
             { x: 18, y: 0, z: 4 },
         ];
         const allCameraPos = [
             { x: 10, y: 10, z: 10 },
+            { x: 10, y: 13, z: - 1},
             { x: 20, y: 10, z: 20 }
         ];
         const allPlayerPos = [
             [0, 0, 0],
+            [0, 0, - 9],
             [18, 0, 4],
         ]
 

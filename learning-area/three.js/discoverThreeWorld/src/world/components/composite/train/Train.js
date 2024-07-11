@@ -24,11 +24,14 @@ class Train extends Moveable2D {
 
         const {
             cabin, chimney, nose, smallWheelFront, smallWheelCenter, smallWheelRear, bigWheel,
-            boundingBox, boundingBoxWire, width, depth, height, Rl, Rs
+            boundingBox, boundingBoxWire,
+            frontBoundingFace, backBoundingFace, leftBoundingFace, rightBoundingFace,
+            width, depth, height, Rl, Rs
         } = this.meshes;
         this.group.add(
             cabin, nose, chimney, smallWheelRear, smallWheelCenter, smallWheelFront, bigWheel,
-            boundingBox, boundingBoxWire
+            boundingBox, boundingBoxWire,
+            frontBoundingFace, backBoundingFace, leftBoundingFace, rightBoundingFace
         ).name = name;
         this.#w = width;
         this.#d = depth;
@@ -90,7 +93,15 @@ class Train extends Moveable2D {
     }
 
     get velocity() {
-        return this.isAccelerating ? 13.89 : 2.55;
+        return this.isAccelerating ? 10 : 2.55;
+    }
+
+    get recoverCoefficient() {
+        return this.isAccelerating ? 0.04 : 0.02;
+    }
+    
+    get backwardCoefficient() {
+        return this.isAccelerating ? 0.02 : 0.005;
     }
 
     updateBoundingBoxHelper() {
@@ -141,7 +152,9 @@ class Train extends Moveable2D {
     tickWithWall(delta, wall) {
         const params = this.setTickParams(delta);
         params.wall = wall;
-        params.wall.position.y = 0;
+        params.wallMesh = wall.mesh.clone();
+        params.wallMesh.position.y = 0;
+        params.wallMesh.rotationY = wall.mesh.rotationY;
         this.tankmoveTickWithWall(params);
         this.tickWheels(delta, params);
         this.updateBoundingBoxHelper();
