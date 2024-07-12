@@ -241,7 +241,7 @@ class WorldScene4 extends WorldScene {
         tofu.receiveShadow(true);
         tofu.setPosition([0, 0, 3]);
         tofu.setRotation([0, Math.PI, 0]);
-        tofu.setScale([.5, .3, .5]);
+        tofu.setScale([.2, .3, .2]);
         tofu.updateBoundingBoxHelper();
 
         await Promise.all([
@@ -277,9 +277,6 @@ class WorldScene4 extends WorldScene {
 
         this.initContainer();
         this.#loaded = true;
-
-        // console.log(tofu.boundingBox.getCenter(new Vector3()));
-        // console.log(tofu.boundingBox.getSize(new Vector3()));
     }
 
     setupLeftFunctionPanle() {
@@ -487,13 +484,19 @@ class WorldScene4 extends WorldScene {
             height: 2.5,
             color: 0xcccccc
         }
+
+        const wallLSpecs = {
+            width: 2,
+            height: 2.5,
+            color: 0xcccccc
+        }
         const posY = wallSpecs.height / 2 - .1;
 
-        const wall = new Plane(wallSpecs);
+        const wall = new Plane(wallLSpecs);
         wall.name = 'wall17';
         wall.receiveShadow(true);
         wall.castShadow(true);
-        wall.setPosition([- 3, posY, - 4.5]);
+        wall.setPosition([- 3, posY, - 5]);
         wall.setRotationY(- Math.PI / 2);
         wall.updateBoundingBoxHelper();
 
@@ -501,19 +504,43 @@ class WorldScene4 extends WorldScene {
         wall2.name = 'wall18';
         wall2.receiveShadow(true);
         wall2.castShadow(true);
-        wall2.setPosition([- 2.5, posY, - 5]);
+        wall2.setPosition([- 2.5, posY, - 6]);
         wall2.setRotationY(Math.PI);
         wall2.updateBoundingBoxHelper();
 
-        const wall3 = new Plane(wallSpecs);
+        const wall3 = new Plane(wallLSpecs);
         wall3.name = 'wall19';
         wall3.receiveShadow(true);
         wall3.castShadow(true);
-        wall3.setPosition([- 2, posY, - 4.5]);
+        wall3.setPosition([- 2, posY, - 5]);
         wall3.setRotationY(Math.PI / 2);
         wall3.updateBoundingBoxHelper();
 
-        return [wall, wall2, wall3];
+        const wall4 = new Plane(wallLSpecs);
+        wall4.name = 'wall20';
+        wall4.receiveShadow(true);
+        wall4.castShadow(true);
+        wall4.setPosition([2, posY, - 5]);
+        wall4.setRotationY(- Math.PI / 2);
+        wall4.updateBoundingBoxHelper();
+
+        const wall5 = new Plane(wallSpecs);
+        wall5.name = 'wall21';
+        wall5.receiveShadow(true);
+        wall5.castShadow(true);
+        wall5.setPosition([2.5, posY, - 6]);
+        wall5.setRotationY(Math.PI);
+        wall5.updateBoundingBoxHelper();
+
+        const wall6 = new Plane(wallLSpecs);
+        wall6.name = 'wall22';
+        wall6.receiveShadow(true);
+        wall6.castShadow(true);
+        wall6.setPosition([3, posY, - 5]);
+        wall6.setRotationY(Math.PI / 2);
+        wall6.updateBoundingBoxHelper();
+
+        return [wall, wall2, wall3, wall4, wall5, wall6];
     }
 
     focusNext() {

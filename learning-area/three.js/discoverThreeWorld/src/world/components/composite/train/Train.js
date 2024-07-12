@@ -152,9 +152,6 @@ class Train extends Moveable2D {
     tickWithWall(delta, wall) {
         const params = this.setTickParams(delta);
         params.wall = wall;
-        params.wallMesh = wall.mesh.clone();
-        params.wallMesh.position.y = 0;
-        params.wallMesh.rotationY = wall.mesh.rotationY;
         this.tankmoveTickWithWall(params);
         this.tickWheels(delta, params);
         this.updateBoundingBoxHelper();
