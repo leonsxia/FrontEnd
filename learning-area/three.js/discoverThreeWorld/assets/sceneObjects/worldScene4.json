@@ -539,6 +539,7 @@
                     "rotation": [-1.5708, 0, 0]
                 }
             ],
+            "ceilings": [],
             "walls": [],
             "insideWalls" : []
         },
@@ -693,6 +694,7 @@
                     "rotation": [-1.5708, 0, 0]
                 }
             ],
+            "ceilings": [],
             "walls": [],
             "insideWalls" : []
         },
@@ -808,6 +810,7 @@
                     "rotation": [-1.5708, 0, 0]
                 }
             ],
+            "ceilings": [],
             "walls": [],
             "insideWalls" : []
         }
