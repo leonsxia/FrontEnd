@@ -711,6 +711,7 @@ class WorldScene {
 
                 this.scene.remove(this.player.group);
 
+                this.player.resetAnimation?.();
                 this.unsubscribeEvents(this.player, this.setup.moveType);
 
                 if (oldPlayerBoxHelper) this.scene.remove(oldPlayerBoxHelper);
@@ -749,7 +750,7 @@ class WorldScene {
             this.player.setPosition(allPlayerPos[this.loadSequence]);
             this.player.resetFallingState?.();
             this.player.resetHealth();
-            this.player.resetAnimation();
+            this.player.resetAnimation?.();
             this.player.clearInSightTargets();
             this.player.reloadAllWeapons?.();
 
