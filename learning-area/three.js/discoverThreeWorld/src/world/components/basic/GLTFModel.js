@@ -163,7 +163,7 @@ class GLTFModel extends EventDispatcher {
                 
                 if (object.geometry.attributes['uv']) {
 
-                    computeMikkTSpaceTangents(object.geometry, MikkTSpace, true);
+                    computeMikkTSpaceTangents(object.geometry, MikkTSpace, false);
 
                 }
                 this.meshes.push(object);
