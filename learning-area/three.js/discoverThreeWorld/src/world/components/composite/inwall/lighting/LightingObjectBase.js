@@ -1,14 +1,14 @@
 import { Vector3 } from 'three';
-import { SceneObjectBase } from "./SceneObjectBase";
-import { updateSingleLightCamera } from "../../shadowMaker";
-import { BLOOM_SCENE_LAYER } from "../../utils/constants";
-import { isBloomObject } from '../../utils/objectHelper';
+import { ObstacleBase } from '../ObstacleBase';
+import { updateSingleLightCamera } from '../../../shadowMaker';
+import { BLOOM_SCENE_LAYER } from '../../../utils/constants';
+import { isBloomObject } from '../../../utils/objectHelper';
 
 const _v1 = new Vector3();
 const _v2 = new Vector3();
 const BLOOM_TYPE_DEFAULT = 'main';
 
-class LightingSceneBase extends SceneObjectBase {
+class LightingObjectBase extends ObstacleBase {
 
     bloomObjects = [];
     lightObjs = [];
@@ -31,6 +31,13 @@ class LightingSceneBase extends SceneObjectBase {
     alwaysOn = true;
 
     constructor(specs) {
+
+        const { isObstacle = false, enableWallOBBs = false, movable = false, climbable = false } = specs;
+
+        specs.isObstacle = isObstacle;
+        specs.enableWallOBBs = enableWallOBBs;
+        specs.movable = movable;
+        specs.climbable = climbable;
 
         super(specs);
 
@@ -79,8 +86,9 @@ class LightingSceneBase extends SceneObjectBase {
 
         const { light } = lightObj;
         const bloomContainer = this.lightingMap.get(bloomType);
-        const { bloomObject, currentPosition, targetObject, bloomIntensity = 0 } = bloomContainer;
+        const { bloomObject, currentPosition, targetObject, bloomIntensity } = bloomContainer;
 
+        // inject bloomType to light
         light.bloomType = bloomType;
         light.position.add(currentPosition);
 
@@ -96,7 +104,7 @@ class LightingSceneBase extends SceneObjectBase {
         this.lightObjs.push(lightObj);
         bloomContainer.intensity = light.intensity;
         bloomContainer.lightObject = lightObj;
-        
+
         if (isBloomObject(bloomObject)) {
 
             bloomObject.material.color.copy(light.color);
@@ -105,7 +113,7 @@ class LightingSceneBase extends SceneObjectBase {
 
         if (!bloomObject.material.emissiveMap) {
 
-            bloomObject.material.emissive.copy(light.color);              
+            bloomObject.material.emissive.copy(light.color);            
 
         }
 
@@ -120,7 +128,7 @@ class LightingSceneBase extends SceneObjectBase {
     }
 
     setLightPosition(light, position, bloomType = BLOOM_TYPE_DEFAULT) {
-
+    
         const { currentPosition } = this.lightingMap.get(bloomType);
         _v1.set(...position);
         light.position.copy(_v1.add(currentPosition));
@@ -281,11 +289,13 @@ class LightingSceneBase extends SceneObjectBase {
 
             const bloomObj = this.lightingMap.get(light.bloomType).bloomObject;
 
-            if (bloomObj) {
+            if (isBloomObject(bloomObj)) {
 
                 bloomObj.material.color.copy(light.color);
 
             };
+
+            bloomObj ? bloomObj.material.emissive.copy(light.color) : null;
 
         };
 
@@ -307,9 +317,9 @@ class LightingSceneBase extends SceneObjectBase {
         for (let i = 0; i < this.lightObjs.length; i++) {
 
             const { light } = this.lightObjs[i];
-            const bloomContainer = this.lightingMap.get(light.bloomType);
+            const { intensity } = this.lightingMap.get(light.bloomType);
 
-            light.intensity = bloomContainer.intensity;
+            light.intensity = intensity;
 
         }
 
@@ -332,8 +342,25 @@ class LightingSceneBase extends SceneObjectBase {
 
     }
 
-    // this is can be inherited by children
-    updateLights() {}
+    tickFall(delta) {
+
+        this.fallingTick({ delta, obstacle: this });
+
+        this.updateOBBs();
+
+        this.updateLightObjects();
+
+    }
+
+    onGround() {
+
+        this.onGroundTick({ floor: this.hittingGround, obstacle: this });
+        
+        this.updateOBBs();
+
+        this.updateLightObjects();
+        
+    }
 
     onRapierUpdated() {
 
@@ -344,4 +371,4 @@ class LightingSceneBase extends SceneObjectBase {
 
 }
 
-export { LightingSceneBase, BLOOM_TYPE_DEFAULT };
+export { LightingObjectBase, BLOOM_TYPE_DEFAULT };
