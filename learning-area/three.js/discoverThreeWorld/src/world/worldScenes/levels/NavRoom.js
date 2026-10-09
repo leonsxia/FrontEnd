@@ -1,12 +1,12 @@
-import { WorldScene } from "../WorldScene.js";
+import { WorldScene } from "../WorldScene";
 
 const worldSceneSpecs = {
-    name: 'Wood Cabin',
-    src: 'assets/scene_objects/levels/woodCabin.json',
+    name: 'Navigation Room',
+    src: 'assets/scene_objects/levels/navRoom.json',
     enableGui: true
 };
 
-class WoodCabin extends WorldScene {
+class NavRoom extends WorldScene {
 
     constructor(renderer, globalConfig, eventDispatcher) {
 
@@ -17,4 +17,4 @@ class WoodCabin extends WorldScene {
 
 }
 
-export { WoodCabin };
+export { NavRoom };
